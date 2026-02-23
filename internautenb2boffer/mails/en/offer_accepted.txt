@@ -1,0 +1,14 @@
+{shop_url}
+
+Hi {firstname} {lastname},
+
+Your offer has been accepted.
+
+Order: {order_name}
+Date: {date}
+Total: {total_paid}
+
+You can review your order in the Order history and details section of your account:
+{history_url}
+
+Thank you for shopping with {shop_name}.

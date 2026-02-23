@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>internautenb2boffer</name>
+    <displayName><![CDATA[B2B Angebot einholen]]></displayName>
+    <version><![CDATA[1.0.9]]></version>
+    <description><![CDATA[Erm&ouml;glicht Kunden, eine Bestellung aufzugeben und ein Angebot anzufordern.]]></description>
+    <author><![CDATA[die.internauten.ch]]></author>
+    <tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[Möchten Sie dieses Modul wirklich deinstallieren?]]></confirmUninstall>
+    <is_configurable>0</is_configurable>
+    <need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>

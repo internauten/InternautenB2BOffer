@@ -1,0 +1,15 @@
+{shop_url}
+
+Ciao {firstname} {lastname},
+
+Purtroppo, la tua offerta è stata rifiutata.
+
+Ordine: {order_name}
+Data: {date}
+
+Se hai domande, contattaci.
+
+Puoi consultare il tuo ordine nella sezione Cronologia e dettagli ordini del tuo account:
+{history_url}
+
+Grazie per l'interesse dimostrato verso {shop_name}.

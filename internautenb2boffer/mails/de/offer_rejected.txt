@@ -1,0 +1,17 @@
+{shop_url}
+
+Hallo {firstname} {lastname},
+
+Leider wurde Ihre Offerte abgelehnt.
+
+Bestellung: {order_name}
+Datum: {date}
+
+Bei Fragen konnen Sie uns gerne kontaktieren.
+
+Sie konnen Ihre Bestellung im Bereich Bestellverlauf und Details einsehen:
+{history_url}
+
+Vielen Dank fur Ihr Interesse an {shop_name}.
+
+Copyright by die.internauten.ch

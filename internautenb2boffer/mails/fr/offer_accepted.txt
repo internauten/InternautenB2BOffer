@@ -1,0 +1,14 @@
+{shop_url}
+
+Bonjour {firstname} {lastname},
+
+Votre offre a été acceptée.
+
+Commande : {order_name}
+Date : {date}
+Total : {total_paid}
+
+Vous pouvez consulter votre commande dans la section Historique et détails des commandes de votre compte :
+{history_url}
+
+Merci pour votre commande chez {shop_name}.

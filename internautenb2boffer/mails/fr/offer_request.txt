@@ -1,0 +1,38 @@
+ 
+
+{shop_url}
+
+Bonjour {firstname} {lastname},
+
+Merci pour votre commande sur {shop_name} !
+
+Détails de la demande d'offre
+
+Commande : {order_name} Passée le {date}
+
+Référence	Produit	Prix unitaire	Quantité	Prix total  {products_txt} {discounts_txt}
+Produits	{total_products}
+Réductions	{total_discounts}
+Emballage cadeau	{total_wrapping}
+Livraison	{total_shipping}
+Dont taxes	{total_tax_paid}
+Total payé	{total_paid}
+
+Livraison
+
+Transporteur : {carrier}
+
+Adresse de livraison
+
+{delivery_block_txt}
+
+Adresse de facturation
+
+{invoice_block_txt}
+
+Suivez votre demande d'offre dans notre boutique, rendez-vous dans la section [Historique et détails des commandes]({history_url}) de votre compte client.
+
+[{shop_name}]({shop_url})
+
+Propulsé par [PrestaShop](https://www.prestashop.com/?utm_source=marchandprestashop&utm_medium=e-mail&utm_campaign=footer_1-7)
+Copyright die.internauten.ch GmbH

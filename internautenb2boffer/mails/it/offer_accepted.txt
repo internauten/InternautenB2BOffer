@@ -1,0 +1,14 @@
+{shop_url}
+
+Ciao {firstname} {lastname},
+
+La tua offerta è stata accettata.
+
+Ordine: {order_name}
+Data: {date}
+Totale: {total_paid}
+
+Puoi consultare il tuo ordine nella sezione Cronologia e dettagli ordini del tuo account:
+{history_url}
+
+Grazie per aver acquistato su {shop_name}.

@@ -1,0 +1,38 @@
+ 
+
+{shop_url}
+
+Hi {firstname} {lastname},
+
+Thank you for shopping on {shop_name}!
+
+Offer request details
+
+Order: {order_name} Placed on {date}
+
+Reference	Product	Unit price	Quantity	Total price  {products_txt} {discounts_txt}
+Products	{total_products}
+Discounts	{total_discounts}
+Gift-wrapping	{total_wrapping}
+Shipping	{total_shipping}
+Including total tax	{total_tax_paid}
+Total paid	{total_paid}
+
+Shipping
+
+Carrier: {carrier}
+
+Delivery address
+
+{delivery_block_txt}
+
+Billing address
+
+{invoice_block_txt}
+
+Follow your offer request on our shop, go to the [Order history and details]({history_url}) section of your customer account.
+
+[{shop_name}]({shop_url})
+
+Powered by [PrestaShop](https://www.prestashop.com/?utm_source=marchandprestashop&utm_medium=e-mail&utm_campaign=footer_1-7)
+Copyright by die.internauten.ch GmbH

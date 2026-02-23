@@ -1,0 +1,15 @@
+{shop_url}
+
+Bonjour {firstname} {lastname},
+
+Malheureusement, votre offre a été rejetée.
+
+Commande : {order_name}
+Date : {date}
+
+Si vous avez des questions, veuillez nous contacter.
+
+Vous pouvez consulter votre commande dans la section Historique et détails des commandes de votre compte :
+{history_url}
+
+Merci de l'intérêt que vous portez à {shop_name}.

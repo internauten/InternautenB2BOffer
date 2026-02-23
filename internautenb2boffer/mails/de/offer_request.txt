@@ -1,0 +1,37 @@
+{shop_url}
+
+Hallo {firstname} {lastname},
+
+Vielen Dank für Ihren Anfrage bei {shop_name}!
+
+Details zu Ihrer Offertenanfrage
+
+Offertanfrage: {order_name} vom {date}
+
+Zahlung: {payment}
+
+Artikel-Nr.	Artikel	Stückpreis	Menge	Gesamtpreis  {products_txt} {discounts_txt}
+Artikel	{total_products}
+Rabatt	{total_discounts}
+Geschenkverpackung	{total_wrapping}
+Versand	{total_shipping}
+Gesamt MwSt.	{total_tax_paid}
+Gesamt	{total_paid}
+
+Versand
+
+Versanddienst: {carrier}
+
+Lieferadresse:
+
+{delivery_block_txt}
+
+Rechnungsadresse
+
+{invoice_block_txt}
+
+Wir senden Ihnen sobald als möglich eine konkrete Offerte zu.
+
+[{shop_name}]({shop_url})
+
+Copyright by die.internauten.ch

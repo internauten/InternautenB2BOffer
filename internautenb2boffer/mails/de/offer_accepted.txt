@@ -1,0 +1,16 @@
+{shop_url}
+
+Hallo {firstname} {lastname},
+
+Ihre Offerte wurde angenommen.
+
+Bestellung: {order_name}
+Datum: {date}
+Total: {total_paid}
+
+Sie konnen Ihre Bestellung im Bereich Bestellverlauf und Details einsehen:
+{history_url}
+
+Vielen Dank fur Ihren Einkauf bei {shop_name} .
+
+Copyright by die.internauten.ch

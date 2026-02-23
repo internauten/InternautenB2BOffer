@@ -1,0 +1,38 @@
+ 
+
+{shop_url}
+
+Ciao {firstname} {lastname},
+
+Grazie per aver acquistato su {shop_name}!
+
+Dettagli della richiesta di offerta
+
+Ordine: {order_name} Effettuato il {date}
+
+Riferimento	Prodotto	Prezzo unitario	Quantità	Prezzo totale  {products_txt} {discounts_txt}
+Prodotti	{total_products}
+Sconti	{total_discounts}
+Confezione regalo	{total_wrapping}
+Spedizione	{total_shipping}
+Totale imposte incluse	{total_tax_paid}
+Totale pagato	{total_paid}
+
+Spedizione
+
+Corriere: {carrier}
+
+Indirizzo di consegna
+
+{delivery_block_txt}
+
+Indirizzo di fatturazione
+
+{invoice_block_txt}
+
+Segui la tua richiesta di offerta nel nostro negozio, vai alla sezione [Cronologia e dettagli ordini]({history_url}) del tuo account cliente.
+
+[{shop_name}]({shop_url})
+
+Powered by [PrestaShop](https://www.prestashop.com/?utm_source=marchandprestashop&utm_medium=e-mail&utm_campaign=footer_1-7)
+Copyright die.internauten.ch GmbH

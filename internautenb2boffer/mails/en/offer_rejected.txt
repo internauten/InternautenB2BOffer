@@ -1,0 +1,15 @@
+{shop_url}
+
+Hi {firstname} {lastname},
+
+Unfortunately, your offer has been rejected.
+
+Order: {order_name}
+Date: {date}
+
+If you have questions, please contact us.
+
+You can review your order in the Order history and details section of your account:
+{history_url}
+
+Thank you for your interest in {shop_name}.
