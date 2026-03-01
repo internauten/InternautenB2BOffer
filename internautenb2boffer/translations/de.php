@@ -17,7 +17,7 @@ $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_00d23a76e43b46dae
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_b9f5c797ebbf55adccdd8539a65a0241'] = 'Deaktiviert';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_c9cc8cce247e49bae79f15173ce97354'] = 'Speichern';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_58c85aa11cba87114d4cb4a305406ee6'] = 'Wartet auf ein Angebot';
-$_MODULE['<{internautenb2boffer}prestashop>payment_option_a39abf09b862357065b8714d3c72638d'] = 'Wir prüfen Ihre Anfrage und senden Ihnen ein individuelles Angebot. Ihre Bestellung wird mit dem Status „Ausstehend“ angelegt.';
+$_MODULE['<{internautenb2boffer}prestashop>payment_option_a39abf09b862357065b8714d3c72638d'] = 'Wir prüfen Ihre Anfrage und senden Ihnen ein individuelles Angebot. Ihre Bestellung wird mit dem Status „Warten auf Angebot“ angelegt.';
 $_MODULE['<{internautenb2boffer}prestashop>payment_return_da3383165a628653acc588a8a832d4c5'] = 'Ihre Anfrage ist eingegangen.';
 $_MODULE['<{internautenb2boffer}prestashop>payment_return_3dd42bfc8345e82c43b4a40a3426ec49'] = 'Referenz:';
 $_MODULE['<{internautenb2boffer}prestashop>payment_return_66c4c5112f455a19afde47829df363fa'] = 'Gesamt:';
