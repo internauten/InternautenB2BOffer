@@ -15,7 +15,7 @@ class Internautenb2boffer extends PaymentModule
     {
         $this->name = 'internautenb2boffer';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.1';
+        $this->version = '1.0.2';
         $this->author = 'die.internauten.ch';
         $this->controllers = ['validation'];
         $this->is_eu_compatible = 1;
