@@ -12,9 +12,9 @@ Payment module that adds a "Get Offer" payment method. Customers place the order
 
 ## Installation
 
-1. Copy the module folder into `modules/internautenb2boffer`.
-2. In the back office: Modules -> Module Manager -> install "Get Offer".
-3. If upgrading from a previous name, uninstall the old module first.
+1. Download zip of latest release.
+2. In the back office: Modules -> Module Manager -> Load module.
+3. Go to module settings.
 4. Set the Gruppenbeschrankungen in Zahlung -> Voreinstellungen to the groups that can request offers.
    ![Set Gruppenbeschrankungen in Zahlung -> Voreinstellungen](assets/groups.png)
 

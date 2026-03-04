@@ -1,5 +1,10 @@
 # Internauten B2B Offer
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/internauten)
+[![Stars](https://img.shields.io/github/stars/internauten/InternautenB2BOffer?style=social)](https://github.com/internauten/InternautenB2BOffer/stargazers)
+[![Release](https://img.shields.io/github/v/release/internauten/InternautenB2BOffer?sort=semver)](https://github.com/internauten/InternautenB2BOffer/releases)
+[![License](https://img.shields.io/github/license/internauten/InternautenB2BOffer)](https://github.com/internauten/InternautenB2BOffer/blob/main/LICENSE)
+
 Payment module that adds a "Get Offer" payment method. Customers place the order and it is set to a pending "Awaiting Get Offer" state so you can review and respond with a custom offer.
 
 ## Features
@@ -67,3 +72,24 @@ To clone a Unix VM on Azure, follow these steps:
     ```
 4. Activate and configure Module in Prestashop   
     In Prestashop backend go to Module Manager / not installed Modules and install the module. 
+
+## Releases via Tags
+
+This repository includes a GitHub Actions workflow that automatically creates a GitHub Release when you push a tag that matches the `v*` schema (for example: `v1.0.0`).
+
+- Workflow file: `.github/workflows/release-on-tag.yml`
+- Trigger: push of tags starting with `v`
+- Release notes: generated from commit messages between the previous `v*` tag and the current tag
+
+Example:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+## Lizenz
+
+This project is licensed under the MIT License. See details [`LICENSE`](LICENSE).
+
+Copyright (c) 2026 die.internauten.ch

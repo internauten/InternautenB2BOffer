@@ -1,0 +1,52 @@
+name: Create Release on Tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes from commits
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          current_tag="${GITHUB_REF_NAME}"
+
+          previous_tag=$(git tag --sort=-creatordate | grep '^v' | grep -v "^${current_tag}$" | head -n 1 || true)
+
+          {
+            echo "## Changes"
+            echo
+
+            if [ -n "${previous_tag}" ]; then
+              echo "Changes since ${previous_tag}:"
+              echo
+              git log --no-merges --pretty=format:'- %s (%h)' "${previous_tag}..${current_tag}" || true
+            else
+              echo "Initial tagged release ${current_tag}."
+              echo
+              git log --no-merges --pretty=format:'- %s (%h)' "${current_tag}" || true
+            fi
+          } > RELEASE_NOTES.md
+
+          if ! grep -q '^- ' RELEASE_NOTES.md; then
+            echo "- No commit messages found for this tag range." >> RELEASE_NOTES.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
