@@ -80,6 +80,7 @@ This repository includes a GitHub Actions workflow that automatically creates a 
 - Workflow file: `.github/workflows/release-on-tag.yml`
 - Trigger: push of tags starting with `v`
 - Release notes: generated from commit messages between the previous `v*` tag and the current tag
+- Release asset: module ZIP file attached as `internautenb2boffer-v<version>.zip`
 
 Example:
 

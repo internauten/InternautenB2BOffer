@@ -46,7 +46,16 @@ jobs:
             echo "- No commit messages found for this tag range." >> RELEASE_NOTES.md
           fi
 
+      - name: Build module ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          zip_file="internautenb2boffer-${GITHUB_REF_NAME}.zip"
+          zip -r "${zip_file}" internautenb2boffer
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE_NOTES.md
+          files: |
+            internautenb2boffer-${{ github.ref_name }}.zip
