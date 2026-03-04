@@ -104,7 +104,7 @@ Use a dry-run to preview the tag command without creating or pushing anything:
 ./scripts/tag-from-module-version.sh --dry-run
 ```
 
-## Lizenz
+## License
 
 This project is licensed under the MIT License. See details [`LICENSE`](LICENSE).
 
