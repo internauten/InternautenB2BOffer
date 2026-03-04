@@ -108,4 +108,4 @@ Use a dry-run to preview the tag command without creating or pushing anything:
 
 This project is licensed under the MIT License. See details [`LICENSE`](LICENSE).
 
-Copyright (c) 2026 die.internauten.ch
+Copyright (c) 2026 die.internauten.ch GmbH
