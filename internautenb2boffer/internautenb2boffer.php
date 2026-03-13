@@ -9,6 +9,7 @@ if (!defined('_PS_VERSION_')) {
 class Internautenb2boffer extends PaymentModule
 {
     public const DEBUG_CONFIG_KEY = 'INTERNAUTENB2BOFFER_DEBUG_LOGS';
+    public const MODULE_MAIL_TPL_CONFIG_KEY = 'INTERNAUTENB2BOFFER_MODULE_MAIL_TPL';
     private const DEBUG_LOG_PREFIX = '[internautenb2boffer] ';
 
     public function __construct()
@@ -38,12 +39,14 @@ class Internautenb2boffer extends PaymentModule
             && $this->registerHook('actionEmailSendBefore')
             && $this->registerHook('actionOrderStatusPostUpdate')
             && Configuration::updateValue(self::DEBUG_CONFIG_KEY, 0)
+            && Configuration::updateValue(self::MODULE_MAIL_TPL_CONFIG_KEY, 1)
             && $this->installOrderStates();
     }
 
     public function uninstall()
     {
         Configuration::deleteByName(self::DEBUG_CONFIG_KEY);
+        Configuration::deleteByName(self::MODULE_MAIL_TPL_CONFIG_KEY);
 
         return $this->keepOrderStates()
             && parent::uninstall();
@@ -56,6 +59,8 @@ class Internautenb2boffer extends PaymentModule
         if (Tools::isSubmit('submitInternautenb2bofferConfig')) {
             $enabled = (int) Tools::getValue(self::DEBUG_CONFIG_KEY, 0);
             Configuration::updateValue(self::DEBUG_CONFIG_KEY, $enabled);
+            $useModuleTpl = (int) Tools::getValue(self::MODULE_MAIL_TPL_CONFIG_KEY, 1);
+            Configuration::updateValue(self::MODULE_MAIL_TPL_CONFIG_KEY, $useModuleTpl);
             $output .= $this->displayConfirmation($this->l('Settings updated.'));
         }
 
@@ -136,8 +141,10 @@ class Internautenb2boffer extends PaymentModule
         }
 
         $params['template'] = 'offer_request';
-        $params['templatePath'] = _PS_MODULE_DIR_ . $this->name . '/mails/';
-        $this->debugLog('hookActionEmailSendBefore:template_switched order=' . (int) $orderId . ' new_template=offer_request');
+        if ((bool) Configuration::get(self::MODULE_MAIL_TPL_CONFIG_KEY)) {
+            $params['templatePath'] = _PS_MODULE_DIR_ . $this->name . '/mails/';
+        }
+        $this->debugLog('hookActionEmailSendBefore:template_switched order=' . (int) $orderId . ' new_template=offer_request path=' . ($params['templatePath'] ?? 'default'));
 
         return true;
     }
@@ -228,6 +235,25 @@ class Internautenb2boffer extends PaymentModule
                 'input' => [
                     [
                         'type' => 'switch',
+                        'label' => $this->l('Use module email templates'),
+                        'name' => self::MODULE_MAIL_TPL_CONFIG_KEY,
+                        'desc' => $this->l('When enabled, the offer_request email template is loaded from the module (mails/ folder). When disabled, PrestaShop looks for the template in the active theme or default mail directory.'),
+                        'is_bool' => true,
+                        'values' => [
+                            [
+                                'id' => 'module_tpl_on',
+                                'value' => 1,
+                                'label' => $this->l('Module'),
+                            ],
+                            [
+                                'id' => 'module_tpl_off',
+                                'value' => 0,
+                                'label' => $this->l('Theme / Default'),
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'switch',
                         'label' => $this->l('Enable debug logs'),
                         'name' => self::DEBUG_CONFIG_KEY,
                         'desc' => $this->l('Write module debug traces to Back Office logs.'),
@@ -264,6 +290,7 @@ class Internautenb2boffer extends PaymentModule
         $helper->allow_employee_form_lang = (int) Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
         $helper->title = $this->displayName;
         $helper->show_toolbar = false;
+        $helper->fields_value[self::MODULE_MAIL_TPL_CONFIG_KEY] = (int) Configuration::get(self::MODULE_MAIL_TPL_CONFIG_KEY);
         $helper->fields_value[self::DEBUG_CONFIG_KEY] = (int) Configuration::get(self::DEBUG_CONFIG_KEY);
 
         return $helper->generateForm([$fieldsForm]);

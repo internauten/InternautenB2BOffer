@@ -11,6 +11,10 @@ $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_8bc639f4af1fedabd
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_a97ea05b1e9a155a91ffb02981c4ba50'] = 'I log di debug sono attualmente disabilitati.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_f81ee7355de99c6263d4582719b00d8a'] = 'Offerta accettata';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_1d3bb92700ca25028c3edfb675c9f0dd'] = 'Offerta rifiutata';
+$_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_7ee3b2771d7428b8336df3080976f649'] = 'Usa i modelli e-mail del modulo';
+$_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_fb97d9024c8582846d434044e1ecc8d5'] = 'Se abilitato, il modello e-mail offer_request viene caricato dalla cartella del modulo (mails/). Se disabilitato, PrestaShop cerca il modello nel tema attivo o nella directory mail predefinita.';
+$_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_e55f75a29310d7b60f7ac1d390c8ae42'] = 'Modulo';
+$_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_1930b4292246eaa49edcc06c6817a7a0'] = 'Tema / Predefinito';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_65b849a361f21284abc6df2a7437965c'] = 'Impostazioni di debug';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_1b53492c6676712f7449f3fb47976f0c'] = 'Abilita log di debug';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_dbd5c10dc428851a79ecb9a3e9dbe220'] = 'Scrive le tracce di debug del modulo nei log del Back Office.';
