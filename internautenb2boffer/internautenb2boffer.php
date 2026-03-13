@@ -136,6 +136,7 @@ class Internautenb2boffer extends PaymentModule
         }
 
         $params['template'] = 'offer_request';
+        $params['templatePath'] = _PS_MODULE_DIR_ . $this->name . '/mails/';
         $this->debugLog('hookActionEmailSendBefore:template_switched order=' . (int) $orderId . ' new_template=offer_request');
 
         return true;
