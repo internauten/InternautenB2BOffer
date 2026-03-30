@@ -11,6 +11,10 @@ $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_8bc639f4af1fedabd
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_a97ea05b1e9a155a91ffb02981c4ba50'] = 'Les journaux de débogage sont actuellement désactivés.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_f81ee7355de99c6263d4582719b00d8a'] = 'Offre acceptée';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_1d3bb92700ca25028c3edfb675c9f0dd'] = 'Offre rejetée';
+$_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_2d0952c7dfad480fb4ffe2cb697c3582'] = 'Demande d\'offre';
+$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_19e6d0c2e33268b1d203be25d30c21b4'] = 'Votre offre a ete acceptee. Vous pouvez passer cette commande sans modifications.';
+$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_a190b7acabd5578668a4d0787558af1e'] = 'Commander l\'offre acceptee maintenant';
+$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_d949ee1202d06386fd0b6c2eb36fc1ff'] = 'L\'offre n\'a pas pu etre transferee au checkout. Veuillez contacter le support.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_7ee3b2771d7428b8336df3080976f649'] = 'Utiliser les modèles d\'e-mail du module';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_fb97d9024c8582846d434044e1ecc8d5'] = 'Si activé, le modèle d\'e-mail offer_request est chargé depuis le répertoire du module (mails/). Si désactivé, PrestaShop recherche le modèle dans le thème actif ou le répertoire de mails par défaut.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_e55f75a29310d7b60f7ac1d390c8ae42'] = 'Module';

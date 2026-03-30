@@ -16,9 +16,9 @@ class Internautenb2boffer extends PaymentModule
     {
         $this->name = 'internautenb2boffer';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.6';
+        $this->version = '1.0.7';
         $this->author = 'die.internauten.ch';
-        $this->controllers = ['validation'];
+        $this->controllers = ['validation', 'reorder'];
         $this->is_eu_compatible = 1;
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
@@ -36,6 +36,7 @@ class Internautenb2boffer extends PaymentModule
         return parent::install()
             && $this->registerHook('paymentOptions')
             && $this->registerHook('paymentReturn')
+            && $this->registerHook('displayOrderDetail')
             && $this->registerHook('actionEmailSendBefore')
             && $this->registerHook('actionOrderStatusPostUpdate')
             && Configuration::updateValue(self::DEBUG_CONFIG_KEY, 0)
@@ -117,6 +118,57 @@ class Internautenb2boffer extends PaymentModule
         return $this->fetch('module:internautenb2boffer/views/templates/front/payment_return.tpl');
     }
 
+    public function hookDisplayOrderDetail($params)
+    {
+        if (!$this->active || !$this->context->customer->isLogged()) {
+            return '';
+        }
+
+        $orderId = 0;
+        if (!empty($params['order']) && $params['order'] instanceof Order) {
+            $orderId = (int) $params['order']->id;
+        } elseif (!empty($params['id_order'])) {
+            $orderId = (int) $params['id_order'];
+        }
+
+        if ($orderId <= 0) {
+            return '';
+        }
+
+        $order = new Order($orderId);
+        if (!Validate::isLoadedObject($order)) {
+            return '';
+        }
+
+        if ((int) $order->id_customer !== (int) $this->context->customer->id) {
+            return '';
+        }
+
+        if ($order->module !== $this->name) {
+            return '';
+        }
+
+        $acceptedId = (int) Configuration::get('INTERNAUTENB2BOFFER_OS_OFFER_ACCEPTED');
+        if ($acceptedId <= 0 || (int) $order->current_state !== $acceptedId) {
+            return '';
+        }
+
+        $this->smarty->assign([
+            'internautenb2boffer_place_order_url' => $this->context->link->getModuleLink(
+                $this->name,
+                'reorder',
+                [
+                    'id_order' => (int) $order->id,
+                    'key' => (string) $order->secure_key,
+                ],
+                true
+            ),
+            'internautenb2boffer_reorder_status' => (string) Tools::getValue('offer_reorder', ''),
+        ]);
+
+        return $this->fetch('module:internautenb2boffer/views/templates/hook/order_detail_place_order.tpl');
+    }
+
     public function hookActionEmailSendBefore($params)
     {
         $template = isset($params['template']) ? (string) $params['template'] : '';
@@ -141,6 +193,14 @@ class Internautenb2boffer extends PaymentModule
         }
 
         $params['template'] = 'offer_request';
+        $offerRequestSubject = $this->l('Offer request');
+        if (isset($params['subject']) && is_array($params['subject'])) {
+            foreach ($params['subject'] as $langId => $subject) {
+                $params['subject'][$langId] = $offerRequestSubject;
+            }
+        } else {
+            $params['subject'] = $offerRequestSubject;
+        }
         if ((bool) Configuration::get(self::MODULE_MAIL_TPL_CONFIG_KEY)) {
             $params['templatePath'] = _PS_MODULE_DIR_ . $this->name . '/mails/';
         }
