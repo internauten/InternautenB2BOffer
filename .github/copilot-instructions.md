@@ -1,63 +1,65 @@
 # Copilot Instructions for InternautenB2BOffer
 
-Diese Anweisungen gelten fuer das gesamte Repository.
+These instructions guide GitHub Copilot when working in this repository. They help keep changes consistent with our project standards, architecture, and delivery workflow.
 
-## Projektkontext
+## Project context
 
-- Dies ist ein Prestashop-Modul mit dem Modulordner `InternautenB2BOffer`.
-- Zielplattformen:
-  - Prestashop >= 9.1.4
+- This is a PrestaShop module with the module folder `InternautenB2BOffer`.
+- Target platforms:
+  - PrestaShop >= 9.1.4
   - PHP >= 8.3.31
-- Das Repo dient auch als Muster fuer AI-gestuetzte Entwicklung.
+- This repository also serves as a reference example for AI-assisted development.
 
-## Allgemeine Arbeitsweise
+## Working principles
 
-- Bevorzuge kleine, nachvollziehbare Aenderungen mit klarem Zweck.
-- Aendere keine fachlichen Ablaufe ohne Begruendung im PR-Text oder Commit.
-- Bewahre Rueckwaertskompatibilitaet, sofern nicht explizit anders gefordert.
-- Fuehre keine destruktiven Massen-Aenderungen durch (z. B. grossflaechiges Reformatting ohne Nutzen).
+- Keep changes small, understandable, and purposeful.
+- Do not change business logic without clear justification in the PR description or commit message.
+- Maintain backward compatibility unless a breaking change is explicitly required.
+- Avoid destructive bulk changes such as sweeping formatting updates without a clear benefit.
 
-## Coding-Regeln
+## Coding standards
 
-- Verwende fuer neue PHP-Dateien `declare(strict_types=1);`.
-- Nutze sprechende Namen und klare Verantwortung pro Klasse/Funktion.
-- Bevorzuge explizite Typen (Parameter, Rueckgabewerte, Properties), wenn sinnvoll.
-- Halte Funktionen kurz und gut testbar.
-- Jede neue oder geaenderte Datei soll einen kurzen, sinnvollen Datei-Kommentar zum Zweck der Datei enthalten.
-- Position des Datei-Kommentars: In PHP-Dateien direkt unter `declare(strict_types=1);`, in anderen Dateien am Dateianfang.
-- Der Datei-Kommentar soll zusaetzlich einen Copyright-Vermerk zugunsten die.internauten.ch GmbH und einen kurzen Hinweis auf die MIT-Lizenz enthalten.
-- Inline-Kommentare im Code weiterhin nur dann ergaenzen, wenn komplexe Logik sonst schwer nachvollziehbar ist.
+- Use `declare(strict_types=1);` in all new PHP files.
+- Use clear naming and keep each class or function focused on a single responsibility.
+- Prefer explicit types for parameters, return values, and properties where appropriate.
+- Keep functions short and easy to test.
+- Every new or modified file should include a brief but meaningful file header describing its purpose.
+- File-header placement: in PHP files, place it directly below `declare(strict_types=1);`; in other file types, place it at the top of the file.
+- The file header should also include a copyright notice for die.internauten.ch GmbH and a brief reference to the MIT license.
+- Only add inline comments where the logic would otherwise be difficult to follow.
+- Documentation comments and text in Markdown files, including README files, should always be written in English.
 
-Beispiel fuer einen sinnvollen, kurzen Datei-Kommentar (PHP):
+Example of a concise, meaningful PHP file header:
 
 ```php
-// Stellt die API-Endpunkte fuer den Abgleich externer Lagerbestaende bereit.
+// Provides the API endpoints for synchronizing external stock levels.
 // Copyright (c) 2026 die.internauten.ch GmbH
-// Lizenz: MIT
+// License: MIT
 ```
 
-## Prestashop-Modul-spezifisch
+## PrestaShop module-specific guidance
 
-- Behalte die Struktur des Modulordners `InternautenB2BOffer` konsistent.
-- Aendere Hook-Namen, Service-IDs, Konfigurations-Keys und Datenbankstrukturen nur mit klarer Migrationsstrategie.
-- Beruecksichtige, dass das Modul lokal in die Prestashop-Umgebung aus `WoWGetPrestaLocal` eingebunden wird.
-- Fuer Validierungen gegen den Prestashop-Core gilt: Der gesamte relevante Prestashop-PHP-Code liegt relativ zu diesem Repo unter `../WoWGetPrestaLocal/html`.
-- Wenn fuer Analyse, Vergleich oder Kompatibilitaetspruefung Prestashop-Implementierungen benoetigt werden, soll dieser Pfad als primaere Referenz verwendet werden.
+- Keep the structure of the `InternautenB2BOffer` module folder consistent.
+- Only change hook names, service IDs, configuration keys, and database structures when there is a clear migration strategy.
+- Be aware that the module is loaded locally into the PrestaShop environment from `WoWGetPrestaLocal`.
+- For validation against the PrestaShop core, the relevant PrestaShop PHP code is located relative to this repository under `../WoWGetPrestaLocal/html`.
+- If PrestaShop implementations are needed for analysis, comparison, or compatibility checks, this path should be treated as the primary reference.
 
-## Qualitaetssicherung
+## Quality assurance
 
-- Bei Codeaenderungen moeglichst passende Tests ergaenzen oder bestehende Tests anpassen.
-- Wenn keine automatischen Tests vorhanden sind, mindestens konkrete manuelle Testschritte dokumentieren.
-- Fehlermeldungen sollten fuer Entwickler aussagekraeftig sein und keine sensiblen Daten enthalten.
+- When changing code, add the most suitable tests or update existing ones.
+- If no automated tests are available, document concrete manual test steps.
+- Error messages should be clear and useful to developers and must not expose sensitive data.
 
-## Release-Konventionen
+## Release conventions
 
-- Release-Tags folgen dem Muster `vX.Y.Z`.
-- Tag-Erzeugung erfolgt ueber das Script im Ordner `scripts` (siehe README).
-- Die GitHub-Action fuer Releases darf durch Codeaenderungen nicht unbeabsichtigt gebrochen werden.
+- Release tags follow the pattern `vX.Y.Z`.
+- Tag creation is done through the script in the `scripts` folder (see README).
+- Code changes must not unintentionally break the GitHub Action responsible for releases.
 
-## Copilot-Antwortstil im Repo
+## Copilot behavior in this repository
 
-- Erklaerungen und Vorschlaege bevorzugt auf Deutsch.
-- Bei unklaren Anforderungen zuerst Annahmen benennen.
-- Bei groesseren Eingriffen zuerst eine kurze Schrittfolge vorschlagen, dann umsetzen.
+- Explanations and suggestions should preferably be in German.
+- When requirements are unclear, state the assumptions being made before proceeding.
+- For larger changes, propose a brief step-by-step plan first, then implement it.
+- Keep responses aligned with the repository’s architecture, naming conventions, and module-specific constraints.
