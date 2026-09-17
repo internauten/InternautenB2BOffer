@@ -44,8 +44,16 @@ Example of a concise, meaningful PHP file header:
 - Be aware that the module is loaded locally into the PrestaShop environment from `WoWGetPrestaLocal`.
 - For validation against the PrestaShop core, the relevant PrestaShop PHP code is located relative to this repository under `../WoWGetPrestaLocal/html`.
 - If PrestaShop implementations are needed for analysis, comparison, or compatibility checks, this path should be treated as the primary reference.
+- Any user-facing text shown in the back office or on the front end must always go through the translation files instead of being hardcoded in PHP, templates or other source files.
+- Keep the translation files for `en`, `de`, `fr`, and `it` aligned whenever new strings or behavior are introduced.
+- In the German translation file, use proper German umlauts such as `ä`, `ö`, `ü`, and `ß` instead of ASCII substitutes.
 
 ## Quality assurance
+
+- When adding or changing functionality, update the module documentation in `README.md` so new features and behavior are reflected there.
+- Keep the module version current whenever a user-visible change, fix, or feature addition is made.
+- If a change affects the module behavior, the version should be reviewed and incremented according to the project release convention (`vX.Y.Z`).
+- Treat version updates as part of the change when shipping a new feature, fix, or user-facing improvement.
 
 - When changing code, add the most suitable tests or update existing ones.
 - If no automated tests are available, document concrete manual test steps.
