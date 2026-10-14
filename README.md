@@ -1,3 +1,9 @@
+<!--
+Project overview, development setup, and release process for the Internauten B2B Offer module.
+Copyright (c) 2026 die.internauten.ch GmbH
+License: MIT
+-->
+
 # Internauten B2B Offer
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/internauten)
@@ -13,14 +19,20 @@ Payment module that adds a "Get Offer" payment method. Customers place the order
 - Creates a pending order in "Awaiting Get Offer" state.
 - Adds two extra order states for your workflow: "Offer accepted" and "Offer rejected".
 - Custom order confirmation message for this payment method.
+- Replaces the standard order confirmation email with an "Offer request" email.
+- Sends custom emails for "Offer accepted" and "Offer rejected" with full order details.
+- Lets customers place an accepted offer as a new order with one click from their order details page.
+- Back office settings for the email template source and debug logging.
+
+See the [module README](internautenb2boffer/README.md) for usage, configuration, and email template details.
 
 ## Installation
 
-See [Zum Modul README](internautenb2boffer/README.md#installation)
+See the [module README](internautenb2boffer/README.md#installation).
 
 ## Development
 
-### Prepare Dev Environemt
+### Prepare Dev Environment
 
 If your Shop is running on Azure best would be that you use a copy of the production system.
 To clone a Unix VM on Azure, follow these steps:
@@ -35,7 +47,7 @@ To clone a Unix VM on Azure, follow these steps:
     sudo nano /etc/nginx/sites-available/prestashop
     sudo nginx -s reload
     ```
-7. create new certificat
+7. Create a new certificate
     ```bash
     sudo certbot --nginx
     sudo nginx -s reload
@@ -48,19 +60,19 @@ To clone a Unix VM on Azure, follow these steps:
     sudo reboot
     ```
 9. Set Prestashop URL   
-    Use propriate SQL Client, adjust url and shop id    
+    Use an appropriate SQL client, adjust URL and shop ID
     ```sql
     UPDATE prestashop.ps_shop_url SET `domain`='your.new.test.url',`domain_ssl`='your.new.test.url' WHERE id_shop_url=1;
     ```
 
 ### Get Module and install it
 
-1. git clone yor fork of this repo
+1. Clone your fork of this repository
     ```bash
     cd ~ 
     git clone https://github.com/yourgithub/InternautenB2BOffer.git
     ```
-2. set owner, goup and rights
+2. Set owner, group, and permissions
     ```bash
     sudo chown -R www-data:www-data ~/InternautenB2BOffer/internautenb2boffer
     ```

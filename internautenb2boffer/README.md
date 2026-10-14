@@ -1,3 +1,9 @@
+<!--
+User documentation for the Internauten B2B Offer PrestaShop module.
+Copyright (c) 2026 die.internauten.ch GmbH
+License: MIT
+-->
+
 # Internauten B2B Offer
 
 Payment module that adds a "Get Offer" payment method. Customers place the order and it is set to a pending "Awaiting Get Offer" state so you can review and respond with a custom offer.
@@ -8,27 +14,70 @@ Payment module that adds a "Get Offer" payment method. Customers place the order
 - Creates a pending order in "Awaiting Get Offer" state.
 - Adds two extra order states for your workflow: "Offer accepted" and "Offer rejected".
 - Custom order confirmation message for this payment method.
+- Replaces the standard order confirmation email (`order_conf`) with an "Offer request" email for orders placed with this payment method.
 - Sends custom emails for "Offer accepted" and "Offer rejected" with full order details.
+- Lets customers place an accepted offer as a new order with one click from their order details page.
+- Back office settings for the email template source and debug logging.
 
 ## Installation
 
 1. Download zip of latest release.
 2. In the back office: Modules -> Module Manager -> Load module.
 3. Go to module settings.
-4. Set the Gruppenbeschrankungen in Zahlung -> Voreinstellungen to the groups that can request offers.
-   ![Set Gruppenbeschrankungen in Zahlung -> Voreinstellungen](assets/groups.png)
+4. In Payment -> Preferences, set the group restrictions to the customer groups that can request offers, and check the currency restrictions.
+   ![Set group restrictions in Payment -> Preferences](assets/groups.png)
+
+The "Get Offer" payment option is only shown for currencies enabled for this module in Payment -> Preferences.
 
 ## Usage
 
-- Customer selects "Get Offer" at checkout and completes the order.
-- The order is created with status "Awaiting Get Offer".
-- You can manually switch the order to "Offer accepted" or "Offer rejected" in the order status dropdown.
+1. Customer selects "Get Offer" at checkout and completes the order.
+2. The order is created with status "Awaiting Get Offer" and the customer receives the "Offer request" email.
+3. You review the order and switch it to "Offer accepted" or "Offer rejected" in the order status dropdown. The customer receives the matching email.
+4. For accepted offers, see [Place accepted offer](#place-accepted-offer).
 
 Note: Uninstalling the module keeps the custom order states so historical orders remain readable.
 
+## Place accepted offer
+
+When an order has the status "Offer accepted", the logged-in customer sees a "Place accepted offer now" button on the order details page in their account.
+
+Clicking the button:
+
+1. Verifies that the order belongs to the customer, was placed with this module, matches the order's secure key, and is still in "Offer accepted" state.
+2. Duplicates the original cart (same flow as the PrestaShop reorder function). If duplication fails, the cart is rebuilt from the order lines.
+3. Redirects the customer to checkout with the new cart, where the order can be completed with a regular payment method.
+
+If the cart cannot be transferred, the order details page shows a warning asking the customer to contact support.
+
+## Configuration
+
+Back Office: Modules -> Module Manager -> Get Offer -> Configure.
+
+| Setting | Configuration key | Default | Description |
+|---|---|---|---|
+| Use module email templates | `INTERNAUTENB2BOFFER_MODULE_MAIL_TPL` | Module | Controls where the `offer_request` template is loaded from. See [Email templates](#email-templates). |
+| Enable debug logs | `INTERNAUTENB2BOFFER_DEBUG_LOGS` | Disabled | Writes module debug traces to the back office logs. |
+
+## Hooks
+
+The module registers the following hooks on installation:
+
+| Hook | Purpose |
+|---|---|
+| `paymentOptions` | Adds the "Get Offer" payment option at checkout (only for allowed currencies). |
+| `paymentReturn` | Shows the custom confirmation message on the order confirmation page. |
+| `displayOrderDetail` | Shows the "Place accepted offer now" button on the customer's order details page for orders in "Offer accepted" state. |
+| `actionEmailSendBefore` | Replaces the `order_conf` email with `offer_request` for orders placed with this module. |
+| `actionOrderStatusPostUpdate` | Sends the `offer_accepted` or `offer_rejected` email when the order status changes accordingly. |
+
+`displayOrderDetail` was added in version 1.0.7 and is registered for existing installations by `upgrade/upgrade-1.0.7.php`.
+
+If you transplant or unhook any of these hooks in Design -> Positions, the related feature stops working.
+
 ## Debug logging toggle
 
-The module contains temporary debug logs guarded by configuration key `INTERNAUTENB2BOFFER_DEBUG_LOGS`.
+The module contains debug logs guarded by configuration key `INTERNAUTENB2BOFFER_DEBUG_LOGS`.
 
 Back Office toggle: Modules -> Module Manager -> Get Offer -> Configure -> Enable debug logs.
 
@@ -79,32 +128,27 @@ This module ships the following email templates in the module folder:
 - `mails/it/offer_rejected.html`
 - `mails/it/offer_rejected.txt`
 
-The module sends its custom emails from the module templates by default. If you want theme overrides, copy the templates into your active theme mail folders and customize them, for example:
+| Email | Sent when | Template source |
+|---|---|---|
+| `offer_request` | Order is placed with "Get Offer" (replaces `order_conf`) | Depends on "Use module email templates" |
+| `offer_accepted` | Order status changes to "Offer accepted" | Always the module path |
+| `offer_rejected` | Order status changes to "Offer rejected" | Always the module path |
 
-- `themes/<active_theme>/mails/en/offer_request.html`
-- `themes/<active_theme>/mails/en/offer_request.txt`
-- `themes/<active_theme>/mails/en/offer_accepted.html`
-- `themes/<active_theme>/mails/en/offer_accepted.txt`
-- `themes/<active_theme>/mails/en/offer_rejected.html`
-- `themes/<active_theme>/mails/en/offer_rejected.txt`
-- `themes/<active_theme>/mails/de/offer_request.html`
-- `themes/<active_theme>/mails/de/offer_request.txt`
-- `themes/<active_theme>/mails/de/offer_accepted.html`
-- `themes/<active_theme>/mails/de/offer_accepted.txt`
-- `themes/<active_theme>/mails/de/offer_rejected.html`
-- `themes/<active_theme>/mails/de/offer_rejected.txt`
-- `themes/<active_theme>/mails/fr/offer_request.html`
-- `themes/<active_theme>/mails/fr/offer_request.txt`
-- `themes/<active_theme>/mails/fr/offer_accepted.html`
-- `themes/<active_theme>/mails/fr/offer_accepted.txt`
-- `themes/<active_theme>/mails/fr/offer_rejected.html`
-- `themes/<active_theme>/mails/fr/offer_rejected.txt`
-- `themes/<active_theme>/mails/it/offer_request.html`
-- `themes/<active_theme>/mails/it/offer_request.txt`
-- `themes/<active_theme>/mails/it/offer_accepted.html`
-- `themes/<active_theme>/mails/it/offer_accepted.txt`
-- `themes/<active_theme>/mails/it/offer_rejected.html`
-- `themes/<active_theme>/mails/it/offer_rejected.txt`
+### Theme overrides
+
+For templates loaded from the module path, PrestaShop first looks in the active theme (and its parent theme), so you can override them without changing the module:
+
+- `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_request.html`
+- `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_request.txt`
+- `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_accepted.html`
+- `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_accepted.txt`
+- `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_rejected.html`
+- `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_rejected.txt`
+
+If "Use module email templates" is set to "Theme / Default", `offer_request` is resolved like a core email instead: first `themes/<active_theme>/mails/<lang>/`, then the shop's `mails/<lang>/` folder, and finally the module's `mails/` folder as fallback. The following paths apply in that case:
+
+- `themes/<active_theme>/mails/<lang>/offer_request.html`
+- `themes/<active_theme>/mails/<lang>/offer_request.txt`
 
 ## Template variables
 
