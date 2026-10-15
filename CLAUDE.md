@@ -5,3 +5,4 @@ License: MIT
 -->
 
 @AGENTS.md
+@AGENTS.local.md

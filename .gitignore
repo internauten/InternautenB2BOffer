@@ -27,3 +27,5 @@ cache/
 
 # Secrets
 SECRET.md
+AGENTS.local.md
+CLAUDE.local.md
