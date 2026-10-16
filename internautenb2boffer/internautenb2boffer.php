@@ -1,5 +1,9 @@
 <?php
 
+// Payment module that lets customers submit their cart as an offer request.
+// Copyright (c) 2026 die.internauten.ch GmbH
+// License: MIT
+
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 if (!defined('_PS_VERSION_')) {
@@ -16,7 +20,7 @@ class Internautenb2boffer extends PaymentModule
     {
         $this->name = 'internautenb2boffer';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.7';
+        $this->version = '1.0.8';
         $this->author = 'die.internauten.ch';
         $this->controllers = ['validation', 'reorder'];
         $this->is_eu_compatible = 1;
@@ -38,6 +42,7 @@ class Internautenb2boffer extends PaymentModule
             && $this->registerHook('paymentReturn')
             && $this->registerHook('displayOrderDetail')
             && $this->registerHook('actionEmailSendBefore')
+            && $this->moveEmailHookToFirstPosition()
             && $this->registerHook('actionOrderStatusPostUpdate')
             && Configuration::updateValue(self::DEBUG_CONFIG_KEY, 0)
             && Configuration::updateValue(self::MODULE_MAIL_TPL_CONFIG_KEY, 1)
@@ -111,7 +116,7 @@ class Internautenb2boffer extends PaymentModule
         $this->smarty->assign([
             'status' => 'ok',
             'shop_name' => $this->context->shop->name,
-            'total_to_pay' => Tools::displayPrice($order->total_paid, new Currency($order->id_currency)),
+            'total_to_pay' => $this->formatPrice((float) $order->total_paid, new Currency((int) $order->id_currency)),
             'reference' => $order->reference,
         ]);
 
@@ -264,9 +269,9 @@ class Internautenb2boffer extends PaymentModule
 
         $this->debugLog(
             'hookActionOrderStatusPostUpdate:mail_sent order=' . (int) $order->id
-                . ' template=' . $template
-                . ' to=' . $customer->email
-                . ' success=' . (int) $sent
+            . ' template=' . $template
+            . ' to=' . $customer->email
+            . ' success=' . (int) $sent
         );
     }
 
@@ -377,7 +382,47 @@ class Internautenb2boffer extends PaymentModule
         return (bool) Configuration::get(self::DEBUG_CONFIG_KEY);
     }
 
-    private function installOrderStates()
+    // Must run before mail transport modules that send the mail inside this hook and stop the core flow.
+    public function moveEmailHookToFirstPosition(): bool
+    {
+        $hookId = (int) Hook::getIdByName('actionEmailSendBefore');
+        if ($hookId <= 0 || !$this->id) {
+            return false;
+        }
+
+        $db = Db::getInstance();
+        $table = _DB_PREFIX_ . 'hook_module';
+        $shopIds = $db->executeS(
+            'SELECT `id_shop`, `position` FROM `' . $table . '`'
+            . ' WHERE `id_hook` = ' . $hookId . ' AND `id_module` = ' . (int) $this->id
+        );
+
+        foreach ($shopIds ?: [] as $row) {
+            $shopId = (int) $row['id_shop'];
+            $position = (int) $row['position'];
+
+            $shifted = $db->execute(
+                'UPDATE `' . $table . '` SET `position` = `position` + 1'
+                . ' WHERE `id_hook` = ' . $hookId . ' AND `id_shop` = ' . $shopId
+                . ' AND `position` < ' . $position . ' AND `id_module` != ' . (int) $this->id
+            );
+            $moved = $db->execute(
+                'UPDATE `' . $table . '` SET `position` = 1'
+                . ' WHERE `id_hook` = ' . $hookId . ' AND `id_shop` = ' . $shopId
+                . ' AND `id_module` = ' . (int) $this->id
+            );
+
+            if (!$shifted || !$moved) {
+                return false;
+            }
+        }
+
+        Cache::clean(Hook::MODULE_LIST_BY_HOOK_KEY . '*');
+
+        return true;
+    }
+
+    public function installOrderStates(): bool
     {
         return $this->ensureOrderState(
             'INTERNAUTENB2BOFFER_OS_GETOFFER',
@@ -417,6 +462,7 @@ class Internautenb2boffer extends PaymentModule
                 $existingState->template = $template ?: '';
                 $existingState->color = $color;
                 $existingState->module_name = $this->name;
+                $existingState->deleted = false;
 
                 $languages = Language::getLanguages(false);
                 foreach ($languages as $language) {
@@ -467,21 +513,37 @@ class Internautenb2boffer extends PaymentModule
         Configuration::deleteByName($configKey);
     }
 
-    private function translateOrderStateLabel($stateKey, $languageId)
+    // $this->l() with a locale is unreliable in a loop: the core merges all language files into one cache.
+    private function translateOrderStateLabel(string $stateKey, int $languageId): string
     {
-        $language = new Language((int) $languageId);
-        $locale = Validate::isLoadedObject($language) ? $language->locale : null;
+        $source = match ($stateKey) {
+            'accepted' => 'Offer accepted',
+            'rejected' => 'Offer rejected',
+            default => 'Awaiting Get Offer',
+        };
 
-        switch ($stateKey) {
-            case 'getoffer':
-                return $this->l('Awaiting Get Offer', false, $locale);
-            case 'accepted':
-                return $this->l('Offer accepted', false, $locale);
-            case 'rejected':
-                return $this->l('Offer rejected', false, $locale);
-            default:
-                return $this->l('Awaiting Get Offer', false, $locale);
+        $iso = (string) Language::getIsoById($languageId);
+        $translations = $iso !== '' ? $this->loadTranslationFile($iso) : [];
+        $key = '<{' . $this->name . '}prestashop>' . $this->name . '_' . md5($source);
+
+        return !empty($translations[$key]) ? stripslashes($translations[$key]) : $source;
+    }
+
+    private function loadTranslationFile(string $iso): array
+    {
+        global $_MODULE;
+
+        $file = $this->getLocalPath() . 'translations/' . basename($iso) . '.php';
+        if (!is_file($file)) {
+            return [];
         }
+
+        $previous = $_MODULE;
+        include $file;
+        $translations = is_array($_MODULE) ? $_MODULE : [];
+        $_MODULE = $previous;
+
+        return $translations;
     }
 
     private function getOrderEmailTemplateVars(Order $order, OrderState $orderState)
@@ -511,7 +573,7 @@ class Internautenb2boffer extends PaymentModule
             '{shop_url}' => $this->context->shop->getBaseURL(true),
             '{order_name}' => $order->getUniqReference(),
             '{date}' => Tools::displayDate($order->date_add, (int) $order->id_lang, true),
-            '{total_paid}' => Tools::displayPrice($order->total_paid, $currency),
+            '{total_paid}' => $this->formatPrice((float) $order->total_paid, $currency),
             '{history_url}' => $historyUrl,
             '{payment}' => $order->payment,
             '{carrier}' => Validate::isLoadedObject($carrier) ? $carrier->name : '',
@@ -523,11 +585,11 @@ class Internautenb2boffer extends PaymentModule
             '{invoice_block_html}' => $invoiceBlockHtml,
             '{delivery_block_txt}' => $deliveryBlockTxt,
             '{invoice_block_txt}' => $invoiceBlockTxt,
-            '{total_products}' => Tools::displayPrice($order->total_products_wt, $currency),
-            '{total_discounts}' => Tools::displayPrice($order->total_discounts_tax_incl, $currency),
-            '{total_wrapping}' => Tools::displayPrice($order->total_wrapping_tax_incl, $currency),
-            '{total_shipping}' => Tools::displayPrice($order->total_shipping_tax_incl, $currency),
-            '{total_tax_paid}' => Tools::displayPrice($order->total_paid_tax_incl - $order->total_paid_tax_excl, $currency),
+            '{total_products}' => $this->formatPrice((float) $order->total_products_wt, $currency),
+            '{total_discounts}' => $this->formatPrice((float) $order->total_discounts_tax_incl, $currency),
+            '{total_wrapping}' => $this->formatPrice((float) $order->total_wrapping_tax_incl, $currency),
+            '{total_shipping}' => $this->formatPrice((float) $order->total_shipping_tax_incl, $currency),
+            '{total_tax_paid}' => $this->formatPrice((float) $order->total_paid_tax_incl - (float) $order->total_paid_tax_excl, $currency),
         ];
 
         $orderHistory = new OrderHistory();
@@ -554,6 +616,7 @@ class Internautenb2boffer extends PaymentModule
             }
         }
 
+
         return $templateVars;
     }
 
@@ -567,9 +630,9 @@ class Internautenb2boffer extends PaymentModule
         foreach ($products as $product) {
             $reference = !empty($product['product_reference']) ? $product['product_reference'] : '';
             $name = $product['product_name'] ?? '';
-            $unitPrice = Tools::displayPrice((float) ($product['unit_price_tax_incl'] ?? 0), $currency);
+            $unitPrice = $this->formatPrice((float) ($product['unit_price_tax_incl'] ?? 0), $currency);
             $quantity = (int) ($product['product_quantity'] ?? 0);
-            $total = Tools::displayPrice((float) ($product['total_price_tax_incl'] ?? 0), $currency);
+            $total = $this->formatPrice((float) ($product['total_price_tax_incl'] ?? 0), $currency);
 
             $lines[] = '<tr>'
                 . '<td style="padding: 10px 5px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($reference) . '</td>'
@@ -593,9 +656,9 @@ class Internautenb2boffer extends PaymentModule
         foreach ($products as $product) {
             $reference = !empty($product['product_reference']) ? $product['product_reference'] : '';
             $name = $product['product_name'] ?? '';
-            $unitPrice = Tools::displayPrice((float) ($product['unit_price_tax_incl'] ?? 0), $currency);
+            $unitPrice = $this->formatPrice((float) ($product['unit_price_tax_incl'] ?? 0), $currency);
             $quantity = (int) ($product['product_quantity'] ?? 0);
-            $total = Tools::displayPrice((float) ($product['total_price_tax_incl'] ?? 0), $currency);
+            $total = $this->formatPrice((float) ($product['total_price_tax_incl'] ?? 0), $currency);
 
             $lines[] = $reference . "\t" . $name . "\t" . $unitPrice . "\t" . $quantity . "\t" . $total;
         }
@@ -612,7 +675,7 @@ class Internautenb2boffer extends PaymentModule
         $lines = [];
         foreach ($cartRules as $rule) {
             $name = $rule['name'] ?? '';
-            $value = Tools::displayPrice((float) ($rule['value'] ?? 0), $currency);
+            $value = $this->formatPrice((float) ($rule['value'] ?? 0), $currency);
 
             $lines[] = '<tr class="order_summary">'
                 . '<td colspan="4" style="padding: 10px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($name) . '</td>'
@@ -632,11 +695,22 @@ class Internautenb2boffer extends PaymentModule
         $lines = [];
         foreach ($cartRules as $rule) {
             $name = $rule['name'] ?? '';
-            $value = Tools::displayPrice((float) ($rule['value'] ?? 0), $currency);
+            $value = $this->formatPrice((float) ($rule['value'] ?? 0), $currency);
             $lines[] = $name . "\t-" . $value;
         }
 
         return "\n" . implode("\n", $lines);
+    }
+
+    // Tools::displayPrice() was removed in PrestaShop 9.
+    private function formatPrice(float $amount, Currency $currency): string
+    {
+        $locale = $this->context->getCurrentLocale();
+        if ($locale === null) {
+            return number_format($amount, 2, '.', "'") . ' ' . $currency->iso_code;
+        }
+
+        return $locale->formatPrice($amount, $currency->iso_code);
     }
 
     private function formatAddressHtml(Address $address, $languageId)

@@ -73,6 +73,8 @@ The module registers the following hooks on installation:
 
 `displayOrderDetail` was added in version 1.0.7 and is registered for existing installations by `upgrade/upgrade-1.0.7.php`.
 
+`actionEmailSendBefore` must run before mail transport modules (e.g. `internautengraph`) that send the email within this hook and stop the core flow. Otherwise the customer receives the standard "Order confirmation" instead of the "Offer request". The module therefore moves itself to the first position of this hook on installation and when upgrading to 1.0.8. If you reorder the hook in Design -> Positions, keep this module first.
+
 If you transplant or unhook any of these hooks in Design -> Positions, the related feature stops working.
 
 ## Debug logging toggle
