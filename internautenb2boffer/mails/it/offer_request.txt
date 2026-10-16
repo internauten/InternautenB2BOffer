@@ -1,8 +1,8 @@
 Ciao {firstname} {lastname},
 
-Grazie per la tua richiesta di offerta su {shop_name}!
+Grazie per la tua richiesta su {shop_name}!
 
-Offerta: {order_name} del {date}
+Richiesta di offerta: {order_name} del {date}
 
 Riferimento	Prodotto	Prezzo unitario	Quantità	Prezzo totale{products_txt}
 {discounts_txt}
@@ -13,6 +13,7 @@ Confezione regalo: {total_wrapping}
 Spedizione: {total_shipping}
 Totale imposte: {total_tax_paid}
 Totale: {total_paid}
+Tutti i prezzi sono IVA esclusa.
 
 Corriere: {carrier}
 
@@ -22,7 +23,7 @@ Indirizzo di consegna:
 Indirizzo di fatturazione:
 {invoice_block_txt}
 
-Ti invieremo un'offerta concreta il prima possibile. Puoi seguire la tua richiesta nella sezione «Cronologia e dettagli ordini» del tuo account cliente:
+Ti invieremo un'offerta concreta il prima possibile. Puoi seguire lo stato della tua richiesta nella sezione «Cronologia e dettagli ordini» del tuo account cliente.
 {history_url}
 
 {shop_name} – {shop_url}

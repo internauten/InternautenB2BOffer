@@ -23,7 +23,7 @@ class Internautenb2boffer extends PaymentModule
     {
         $this->name = 'internautenb2boffer';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.0';
+        $this->version = '1.1.2';
         $this->author = 'die.internauten.ch';
         $this->controllers = ['validation', 'reorder'];
         $this->is_eu_compatible = 1;
@@ -216,6 +216,13 @@ class Internautenb2boffer extends PaymentModule
         }
         if ((bool) Configuration::get(self::MODULE_MAIL_TPL_CONFIG_KEY)) {
             $params['templatePath'] = _PS_MODULE_DIR_ . $this->name . '/mails/';
+        }
+        // Core order_conf prices depend on the customer group tax setting; offers always show prices excl. tax.
+        if (isset($params['templateVars']) && is_array($params['templateVars'])) {
+            $params['templateVars'] = array_merge(
+                $params['templateVars'],
+                $this->getPriceTemplateVars($order, new Currency((int) $order->id_currency))
+            );
         }
         $this->debugLog('hookActionEmailSendBefore:template_switched order=' . (int) $orderId . ' new_template=offer_request path=' . ($params['templatePath'] ?? 'default'));
 
@@ -788,15 +795,9 @@ class Internautenb2boffer extends PaymentModule
         $currency = new Currency((int) $order->id_currency);
         $historyUrl = $this->context->link->getPageLink('history', true, $languageId);
         $carrier = new Carrier((int) $order->id_carrier);
-        $products = $order->getProducts();
-        $cartRules = $order->getCartRules();
         $deliveryAddress = new Address((int) $order->id_address_delivery);
         $invoiceAddress = new Address((int) $order->id_address_invoice);
 
-        $productsHtml = $this->buildProductsHtml($products, $currency);
-        $productsTxt = $this->buildProductsTxt($products, $currency);
-        $discountsHtml = $this->buildDiscountsHtml($cartRules, $currency);
-        $discountsTxt = $this->buildDiscountsTxt($cartRules, $currency);
         $deliveryBlockHtml = $this->formatAddressHtml($deliveryAddress, $languageId);
         $invoiceBlockHtml = $this->formatAddressHtml($invoiceAddress, $languageId);
         $deliveryBlockTxt = $this->formatAddressTxt($deliveryAddress, $languageId);
@@ -809,24 +810,14 @@ class Internautenb2boffer extends PaymentModule
             '{shop_url}' => $this->context->shop->getBaseURL(true),
             '{order_name}' => $order->getUniqReference(),
             '{date}' => Tools::displayDate($order->date_add, $languageId, true),
-            '{total_paid}' => $this->formatPrice((float) $order->total_paid, $currency),
             '{history_url}' => $historyUrl,
             '{payment}' => $order->payment,
             '{carrier}' => Validate::isLoadedObject($carrier) ? $carrier->name : '',
-            '{products}' => $productsHtml,
-            '{products_txt}' => $productsTxt,
-            '{discounts}' => $discountsHtml,
-            '{discounts_txt}' => $discountsTxt,
             '{delivery_block_html}' => $deliveryBlockHtml,
             '{invoice_block_html}' => $invoiceBlockHtml,
             '{delivery_block_txt}' => $deliveryBlockTxt,
             '{invoice_block_txt}' => $invoiceBlockTxt,
-            '{total_products}' => $this->formatPrice((float) $order->total_products_wt, $currency),
-            '{total_discounts}' => $this->formatPrice((float) $order->total_discounts_tax_incl, $currency),
-            '{total_wrapping}' => $this->formatPrice((float) $order->total_wrapping_tax_incl, $currency),
-            '{total_shipping}' => $this->formatPrice((float) $order->total_shipping_tax_incl, $currency),
-            '{total_tax_paid}' => $this->formatPrice((float) $order->total_paid_tax_incl - (float) $order->total_paid_tax_excl, $currency),
-        ];
+        ] + $this->getPriceTemplateVars($order, $currency);
 
         $orderHistory = new OrderHistory();
         if (method_exists($orderHistory, 'getEmailTemplateVars')) {
@@ -856,6 +847,26 @@ class Internautenb2boffer extends PaymentModule
         return $templateVars;
     }
 
+    // Line items and subtotals excl. tax; {total_tax_paid} and {total_paid} (incl. tax) complete the sum.
+    private function getPriceTemplateVars(Order $order, Currency $currency): array
+    {
+        $products = $order->getProducts();
+        $cartRules = $order->getCartRules();
+
+        return [
+            '{products}' => $this->buildProductsHtml($products, $currency),
+            '{products_txt}' => $this->buildProductsTxt($products, $currency),
+            '{discounts}' => $this->buildDiscountsHtml($cartRules, $currency),
+            '{discounts_txt}' => $this->buildDiscountsTxt($cartRules, $currency),
+            '{total_products}' => $this->formatPrice((float) $order->total_products, $currency),
+            '{total_discounts}' => $this->formatPrice((float) $order->total_discounts_tax_excl, $currency),
+            '{total_wrapping}' => $this->formatPrice((float) $order->total_wrapping_tax_excl, $currency),
+            '{total_shipping}' => $this->formatPrice((float) $order->total_shipping_tax_excl, $currency),
+            '{total_tax_paid}' => $this->formatPrice((float) $order->total_paid_tax_incl - (float) $order->total_paid_tax_excl, $currency),
+            '{total_paid}' => $this->formatPrice((float) $order->total_paid, $currency),
+        ];
+    }
+
     private function buildProductsHtml(array $products, Currency $currency)
     {
         if (empty($products)) {
@@ -866,16 +877,16 @@ class Internautenb2boffer extends PaymentModule
         foreach ($products as $product) {
             $reference = !empty($product['product_reference']) ? $product['product_reference'] : '';
             $name = $product['product_name'] ?? '';
-            $unitPrice = $this->formatPrice((float) ($product['unit_price_tax_incl'] ?? 0), $currency);
+            $unitPrice = $this->formatPrice((float) ($product['unit_price_tax_excl'] ?? 0), $currency);
             $quantity = (int) ($product['product_quantity'] ?? 0);
-            $total = $this->formatPrice((float) ($product['total_price_tax_incl'] ?? 0), $currency);
+            $total = $this->formatPrice((float) ($product['total_price_tax_excl'] ?? 0), $currency);
 
             $lines[] = '<tr>'
                 . '<td style="padding: 10px 5px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($reference) . '</td>'
                 . '<td style="padding: 10px 5px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($name) . '</td>'
-                . '<td style="padding: 10px 5px; border: 1px solid #DFDFDF;">' . $unitPrice . '</td>'
-                . '<td style="padding: 10px 5px; border: 1px solid #DFDFDF;">' . $quantity . '</td>'
-                . '<td style="padding: 10px 5px; border: 1px solid #DFDFDF;">' . $total . '</td>'
+                . '<td align="right" style="padding: 10px 5px; border: 1px solid #DFDFDF; text-align: right;">' . $unitPrice . '</td>'
+                . '<td align="right" style="padding: 10px 5px; border: 1px solid #DFDFDF; text-align: right;">' . $quantity . '</td>'
+                . '<td align="right" style="padding: 10px 5px; border: 1px solid #DFDFDF; text-align: right;">' . $total . '</td>'
                 . '</tr>';
         }
 
@@ -892,9 +903,9 @@ class Internautenb2boffer extends PaymentModule
         foreach ($products as $product) {
             $reference = !empty($product['product_reference']) ? $product['product_reference'] : '';
             $name = $product['product_name'] ?? '';
-            $unitPrice = $this->formatPrice((float) ($product['unit_price_tax_incl'] ?? 0), $currency);
+            $unitPrice = $this->formatPrice((float) ($product['unit_price_tax_excl'] ?? 0), $currency);
             $quantity = (int) ($product['product_quantity'] ?? 0);
-            $total = $this->formatPrice((float) ($product['total_price_tax_incl'] ?? 0), $currency);
+            $total = $this->formatPrice((float) ($product['total_price_tax_excl'] ?? 0), $currency);
 
             $lines[] = $reference . "\t" . $name . "\t" . $unitPrice . "\t" . $quantity . "\t" . $total;
         }
@@ -911,11 +922,11 @@ class Internautenb2boffer extends PaymentModule
         $lines = [];
         foreach ($cartRules as $rule) {
             $name = $rule['name'] ?? '';
-            $value = $this->formatPrice((float) ($rule['value'] ?? 0), $currency);
+            $value = $this->formatPrice((float) ($rule['value_tax_excl'] ?? 0), $currency);
 
             $lines[] = '<tr class="order_summary">'
                 . '<td colspan="4" style="padding: 10px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($name) . '</td>'
-                . '<td style="padding: 10px; border: 1px solid #DFDFDF;">-' . $value . '</td>'
+                . '<td align="right" style="padding: 10px; border: 1px solid #DFDFDF; text-align: right;">-' . $value . '</td>'
                 . '</tr>';
         }
 
@@ -931,7 +942,7 @@ class Internautenb2boffer extends PaymentModule
         $lines = [];
         foreach ($cartRules as $rule) {
             $name = $rule['name'] ?? '';
-            $value = $this->formatPrice((float) ($rule['value'] ?? 0), $currency);
+            $value = $this->formatPrice((float) ($rule['value_tax_excl'] ?? 0), $currency);
             $lines[] = $name . "\t-" . $value;
         }
 

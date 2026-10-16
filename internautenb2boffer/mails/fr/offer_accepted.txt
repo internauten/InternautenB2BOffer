@@ -1,8 +1,8 @@
 Bonjour {firstname} {lastname},
 
-Votre offre a été acceptée par {shop_name}.
+Suite à votre demande, nous avons le plaisir de vous soumettre l'offre suivante.
 
-Offre : {order_name} du {date}
+Demande d'offre : {order_name} du {date}
 
 Référence	Produit	Prix unitaire	Quantité	Prix total{products_txt}
 {discounts_txt}
@@ -13,6 +13,7 @@ Emballage cadeau : {total_wrapping}
 Livraison : {total_shipping}
 Dont taxes : {total_tax_paid}
 Total : {total_paid}
+Tous les prix sont indiqués hors TVA.
 
 Transporteur : {carrier}
 
@@ -22,7 +23,7 @@ Adresse de livraison :
 Adresse de facturation :
 {invoice_block_txt}
 
-Vous pouvez consulter votre commande dans la section « Historique et détails des commandes » de votre compte client :
+Si vous avez des questions, n'hésitez pas à nous contacter. Vous pouvez consulter votre commande dans la section « Historique et détails des commandes » de votre compte client. Vous pouvez également y passer commande de cette offre.
 {history_url}
 
 {shop_name} – {shop_url}

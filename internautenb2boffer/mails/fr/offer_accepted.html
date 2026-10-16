@@ -7,107 +7,88 @@ License: MIT
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Offre acceptée</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Offre</title>
 </head>
 
-<body
-    style="margin:0; padding:0; background-color:#eeeeee; font-family:'Open Sans', Arial, sans-serif; font-size:14px; line-height:22px; color:#363A41;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eeeeee">
-        <tr>
-            <td align="center" style="padding:40px 10px;">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff"
-                    style="max-width:680px; border-radius:4px;">
-                    <tr>
-                        <td align="center" style="padding:40px 50px 20px;">
-                            <a href="{shop_url}" target="_blank"><img src="{shop_logo}" alt="{shop_name}" width="150"
-                                    style="display:block; border:0; height:auto;"></a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding:0 50px;">
-                            <h1 style="margin:0 0 15px; font-size:20px; font-weight:600;">Bonjour {firstname}
-                                {lastname},</h1>
-                            <p style="margin:0 0 25px; font-size:16px;">Votre offre a été acceptée par
-                                <strong>{shop_name}</strong>.</p>
-                            <p style="margin:0 0 25px; padding:15px 20px; border:1px solid #DFDFDF; font-size:16px;">
-                                <strong>Offre :</strong> {order_name} du {date}</p>
-
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-                                style="border-collapse:collapse; font-size:12px;">
-                                <tr>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Référence</th>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Produit</th>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Prix unitaire
-                                    </th>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Quantité</th>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Prix total</th>
-                                </tr>
-                                {products}
-                                {discounts}
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">
-                                        Produits</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_products}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">
-                                        Réductions</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_discounts}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">
-                                        Emballage cadeau</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_wrapping}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">
-                                        Livraison</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_shipping}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Dont
-                                        taxes</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_tax_paid}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right"
-                                        style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">Total</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">{total_paid}
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <p style="margin:25px 0;"><strong>Transporteur :</strong> {carrier}</p>
-
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                                <tr>
-                                    <td valign="top" width="50%" style="padding-right:8px;">
-                                        <p style="margin:0 0 8px; font-weight:600;">Adresse de livraison</p>
-                                        <div style="padding:15px; border:1px solid #DFDFDF;">{delivery_block_html}</div>
-                                    </td>
-                                    <td valign="top" width="50%" style="padding-left:8px;">
-                                        <p style="margin:0 0 8px; font-weight:600;">Adresse de facturation</p>
-                                        <div style="padding:15px; border:1px solid #DFDFDF;">{invoice_block_html}</div>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <p style="margin:25px 0 40px;">Vous pouvez consulter votre commande dans la section « <a
-                                    href="{history_url}" target="_blank"
-                                    style="color:#25B9D7; font-weight:600;">Historique et détails des commandes</a> » de
-                                votre compte client.</p>
-                        </td>
-                    </tr>
-                </table>
-                <p style="margin:20px 0 0; text-align:center;"><a href="{shop_url}"
-                        style="color:#656565; font-size:16px; font-weight:600;">{shop_name}</a></p>
-                <p style="margin:5px 0 0; text-align:center; font-size:12px; color:#656565;">Propulsé par
-                    die.internauten.ch</p>
+<body style="margin:0; padding:0; background-color:#eeeeee; font-family:'Open Sans', Arial, sans-serif; font-size:14px; line-height:22px; color:#363A41;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eeeeee">
+    <tr>
+      <td align="center" style="padding:40px 10px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="max-width:680px; border-radius:4px;">
+          <tr>
+            <td align="center" style="padding:40px 50px 20px;">
+              <a href="{shop_url}" target="_blank"><img src="{shop_logo}" alt="{shop_name}" width="150" style="display:block; border:0; height:auto;"></a>
             </td>
-        </tr>
-    </table>
+          </tr>
+          <tr>
+            <td style="padding:0 50px;">
+              <h1 style="margin:0 0 15px; font-size:20px; font-weight:600;">Bonjour {firstname} {lastname},</h1>
+              <p style="margin:0 0 25px; font-size:16px;">Suite à votre demande, nous avons le plaisir de vous soumettre l'offre suivante.</p>
+              <p style="margin:0 0 25px; padding:15px 20px; border:1px solid #DFDFDF; font-size:16px;"><strong>Demande d'offre :</strong> {order_name} du {date}</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; font-size:12px;">
+                <tr>
+                  <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Référence</th>
+                  <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Produit</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Prix unitaire</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Quantité</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Prix total</th>
+                </tr>
+                {products}
+                {discounts}
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Produits</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_products}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Réductions</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_discounts}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Emballage cadeau</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_wrapping}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Livraison</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_shipping}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Dont taxes</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_tax_paid}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">Total</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600; text-align:right;">{total_paid}</td>
+                </tr>
+              </table>
+              <p style="margin:8px 0 0; font-size:12px; color:#656565;">Tous les prix sont indiqués hors TVA.</p>
+
+              <p style="margin:25px 0;"><strong>Transporteur :</strong> {carrier}</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="top" width="50%" style="padding-right:8px;">
+                    <p style="margin:0 0 8px; font-weight:600;">Adresse de livraison</p>
+                    <div style="padding:15px; border:1px solid #DFDFDF;">{delivery_block_html}</div>
+                  </td>
+                  <td valign="top" width="50%" style="padding-left:8px;">
+                    <p style="margin:0 0 8px; font-weight:600;">Adresse de facturation</p>
+                    <div style="padding:15px; border:1px solid #DFDFDF;">{invoice_block_html}</div>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:25px 0 40px;">Si vous avez des questions, n'hésitez pas à nous contacter. Vous pouvez consulter votre commande dans la section « <a href="{history_url}" target="_blank" style="color:#25B9D7; font-weight:600;">Historique et détails des commandes</a> » de votre compte client. Vous pouvez également y passer commande de cette offre.</p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:20px 0 0; text-align:center;"><a href="{shop_url}" style="color:#656565; font-size:16px; font-weight:600;">{shop_name}</a></p>
+        <p style="margin:5px 0 0; text-align:center; font-size:12px; color:#656565;">Propulsé par die.internauten.ch</p>
+      </td>
+    </tr>
+  </table>
 </body>
 
 </html>

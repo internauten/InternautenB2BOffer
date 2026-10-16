@@ -1,8 +1,8 @@
 Hallo {firstname} {lastname},
 
-Ihre Offerte wurde von {shop_name} angenommen.
+Für Ihre Anfrage unterbreiten wir Ihnen folgendes Angebot.
 
-Offerte: {order_name} vom {date}
+Angebotsanfrage: {order_name} vom {date}
 
 Artikel-Nr.	Artikel	Stückpreis	Menge	Gesamtpreis{products_txt}
 {discounts_txt}
@@ -13,6 +13,7 @@ Geschenkverpackung: {total_wrapping}
 Versand: {total_shipping}
 Gesamt MwSt.: {total_tax_paid}
 Gesamt: {total_paid}
+Alle Preise exkl. MwSt.
 
 Versanddienst: {carrier}
 
@@ -22,7 +23,7 @@ Lieferadresse:
 Rechnungsadresse:
 {invoice_block_txt}
 
-Sie können Ihre Bestellung im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos einsehen:
+Bei Fragen können Sie uns gerne kontaktieren. Sie können Ihre Bestellung im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos einsehen. Dort können Sie dieses Angebot auch als Bestellung aufgeben.
 {history_url}
 
 {shop_name} – {shop_url}

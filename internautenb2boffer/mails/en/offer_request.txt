@@ -1,8 +1,8 @@
 Hi {firstname} {lastname},
 
-Thank you for your offer request at {shop_name}!
+Thank you for your request at {shop_name}!
 
-Offer: {order_name} from {date}
+Offer request: {order_name} from {date}
 
 Reference	Product	Unit price	Quantity	Total price{products_txt}
 {discounts_txt}
@@ -13,6 +13,7 @@ Gift-wrapping: {total_wrapping}
 Shipping: {total_shipping}
 Total tax: {total_tax_paid}
 Total: {total_paid}
+All prices excl. VAT.
 
 Carrier: {carrier}
 
@@ -22,7 +23,7 @@ Delivery address:
 Billing address:
 {invoice_block_txt}
 
-We will send you a concrete offer as soon as possible. You can follow your request in the "Order history and details" section of your customer account:
+We will send you a concrete offer as soon as possible. You can follow the status of your request in the "Order history and details" section of your customer account.
 {history_url}
 
 {shop_name} – {shop_url}

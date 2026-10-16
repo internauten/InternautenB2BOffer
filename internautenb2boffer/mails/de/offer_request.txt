@@ -2,7 +2,7 @@ Hallo {firstname} {lastname},
 
 Vielen Dank für Ihre Anfrage bei {shop_name}!
 
-Offerte: {order_name} vom {date}
+Angebotsanfrage: {order_name} vom {date}
 
 Artikel-Nr.	Artikel	Stückpreis	Menge	Gesamtpreis{products_txt}
 {discounts_txt}
@@ -13,6 +13,7 @@ Geschenkverpackung: {total_wrapping}
 Versand: {total_shipping}
 Gesamt MwSt.: {total_tax_paid}
 Gesamt: {total_paid}
+Alle Preise exkl. MwSt.
 
 Versanddienst: {carrier}
 
@@ -22,7 +23,7 @@ Lieferadresse:
 Rechnungsadresse:
 {invoice_block_txt}
 
-Wir senden Ihnen so bald wie möglich eine konkrete Offerte zu. Den Stand Ihrer Anfrage sehen Sie im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos:
+Wir senden Ihnen so bald wie möglich ein konkretes Angebot zu. Den Stand Ihrer Anfrage sehen Sie im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos.
 {history_url}
 
 {shop_name} – {shop_url}

@@ -1,8 +1,8 @@
 Hi {firstname} {lastname},
 
-Your offer has been accepted by {shop_name}.
+In response to your request, we are pleased to make you the following offer.
 
-Offer: {order_name} from {date}
+Offer request: {order_name} from {date}
 
 Reference	Product	Unit price	Quantity	Total price{products_txt}
 {discounts_txt}
@@ -13,6 +13,7 @@ Gift-wrapping: {total_wrapping}
 Shipping: {total_shipping}
 Total tax: {total_tax_paid}
 Total: {total_paid}
+All prices excl. VAT.
 
 Carrier: {carrier}
 
@@ -22,7 +23,7 @@ Delivery address:
 Billing address:
 {invoice_block_txt}
 
-You can review your order in the "Order history and details" section of your customer account:
+If you have any questions, please contact us. You can review your order in the "Order history and details" section of your customer account. There you can also place this offer as an order.
 {history_url}
 
 {shop_name} – {shop_url}

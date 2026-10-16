@@ -7,109 +7,88 @@ License: MIT
 <html lang="it">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Offerta accettata</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Offerta</title>
 </head>
 
-<body
-    style="margin:0; padding:0; background-color:#eeeeee; font-family:'Open Sans', Arial, sans-serif; font-size:14px; line-height:22px; color:#363A41;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eeeeee">
-        <tr>
-            <td align="center" style="padding:40px 10px;">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff"
-                    style="max-width:680px; border-radius:4px;">
-                    <tr>
-                        <td align="center" style="padding:40px 50px 20px;">
-                            <a href="{shop_url}" target="_blank"><img src="{shop_logo}" alt="{shop_name}" width="150"
-                                    style="display:block; border:0; height:auto;"></a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding:0 50px;">
-                            <h1 style="margin:0 0 15px; font-size:20px; font-weight:600;">Ciao {firstname} {lastname},
-                            </h1>
-                            <p style="margin:0 0 25px; font-size:16px;">La tua offerta è stata accettata da
-                                <strong>{shop_name}</strong>.</p>
-                            <p style="margin:0 0 25px; padding:15px 20px; border:1px solid #DFDFDF; font-size:16px;">
-                                <strong>Offerta:</strong> {order_name} del {date}</p>
-
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-                                style="border-collapse:collapse; font-size:12px;">
-                                <tr>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Riferimento
-                                    </th>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Prodotto</th>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Prezzo unitario
-                                    </th>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Quantità</th>
-                                    <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Prezzo totale
-                                    </th>
-                                </tr>
-                                {products}
-                                {discounts}
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">
-                                        Prodotti</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_products}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Sconti
-                                    </td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_discounts}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">
-                                        Confezione regalo</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_wrapping}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">
-                                        Spedizione</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_shipping}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Totale
-                                        imposte</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF;">{total_tax_paid}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" align="right"
-                                        style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">Totale</td>
-                                    <td style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">{total_paid}
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <p style="margin:25px 0;"><strong>Corriere:</strong> {carrier}</p>
-
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                                <tr>
-                                    <td valign="top" width="50%" style="padding-right:8px;">
-                                        <p style="margin:0 0 8px; font-weight:600;">Indirizzo di consegna</p>
-                                        <div style="padding:15px; border:1px solid #DFDFDF;">{delivery_block_html}</div>
-                                    </td>
-                                    <td valign="top" width="50%" style="padding-left:8px;">
-                                        <p style="margin:0 0 8px; font-weight:600;">Indirizzo di fatturazione</p>
-                                        <div style="padding:15px; border:1px solid #DFDFDF;">{invoice_block_html}</div>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <p style="margin:25px 0 40px;">Puoi consultare il tuo ordine nella sezione «<a
-                                    href="{history_url}" target="_blank"
-                                    style="color:#25B9D7; font-weight:600;">Cronologia e dettagli ordini</a>» del tuo
-                                account cliente.</p>
-                        </td>
-                    </tr>
-                </table>
-                <p style="margin:20px 0 0; text-align:center;"><a href="{shop_url}"
-                        style="color:#656565; font-size:16px; font-weight:600;">{shop_name}</a></p>
-                <p style="margin:5px 0 0; text-align:center; font-size:12px; color:#656565;">Powered by
-                    die.internauten.ch</p>
+<body style="margin:0; padding:0; background-color:#eeeeee; font-family:'Open Sans', Arial, sans-serif; font-size:14px; line-height:22px; color:#363A41;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eeeeee">
+    <tr>
+      <td align="center" style="padding:40px 10px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="max-width:680px; border-radius:4px;">
+          <tr>
+            <td align="center" style="padding:40px 50px 20px;">
+              <a href="{shop_url}" target="_blank"><img src="{shop_logo}" alt="{shop_name}" width="150" style="display:block; border:0; height:auto;"></a>
             </td>
-        </tr>
-    </table>
+          </tr>
+          <tr>
+            <td style="padding:0 50px;">
+              <h1 style="margin:0 0 15px; font-size:20px; font-weight:600;">Ciao {firstname} {lastname},</h1>
+              <p style="margin:0 0 25px; font-size:16px;">In risposta alla tua richiesta, ti sottoponiamo la seguente offerta.</p>
+              <p style="margin:0 0 25px; padding:15px 20px; border:1px solid #DFDFDF; font-size:16px;"><strong>Richiesta di offerta:</strong> {order_name} del {date}</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; font-size:12px;">
+                <tr>
+                  <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Riferimento</th>
+                  <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Prodotto</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Prezzo unitario</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Quantità</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Prezzo totale</th>
+                </tr>
+                {products}
+                {discounts}
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Prodotti</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_products}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Sconti</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_discounts}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Confezione regalo</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_wrapping}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Spedizione</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_shipping}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Totale imposte</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_tax_paid}</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">Totale</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600; text-align:right;">{total_paid}</td>
+                </tr>
+              </table>
+              <p style="margin:8px 0 0; font-size:12px; color:#656565;">Tutti i prezzi sono IVA esclusa.</p>
+
+              <p style="margin:25px 0;"><strong>Corriere:</strong> {carrier}</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="top" width="50%" style="padding-right:8px;">
+                    <p style="margin:0 0 8px; font-weight:600;">Indirizzo di consegna</p>
+                    <div style="padding:15px; border:1px solid #DFDFDF;">{delivery_block_html}</div>
+                  </td>
+                  <td valign="top" width="50%" style="padding-left:8px;">
+                    <p style="margin:0 0 8px; font-weight:600;">Indirizzo di fatturazione</p>
+                    <div style="padding:15px; border:1px solid #DFDFDF;">{invoice_block_html}</div>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:25px 0 40px;">Se hai domande, non esitare a contattarci. Puoi consultare il tuo ordine nella sezione «<a href="{history_url}" target="_blank" style="color:#25B9D7; font-weight:600;">Cronologia e dettagli ordini</a>» del tuo account cliente. Lì puoi anche trasformare questa offerta in un ordine.</p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:20px 0 0; text-align:center;"><a href="{shop_url}" style="color:#656565; font-size:16px; font-weight:600;">{shop_name}</a></p>
+        <p style="margin:5px 0 0; text-align:center; font-size:12px; color:#656565;">Powered by die.internauten.ch</p>
+      </td>
+    </tr>
+  </table>
 </body>
 
 </html>

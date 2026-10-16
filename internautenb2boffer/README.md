@@ -190,6 +190,8 @@ You can use the following placeholders in `offer_request`, `offer_accepted`, and
 - `{total_shipping}`
 - `{total_tax_paid}`
 
+Prices of line items, discounts, and the subtotals `{total_products}`, `{total_discounts}`, `{total_wrapping}`, and `{total_shipping}` are always excluding tax, independent of the customer group's tax display setting. `{total_tax_paid}` is the tax amount and `{total_paid}` the total including tax. For `offer_request`, the module replaces the corresponding core `order_conf` values with these, so all three emails show the same figures.
+
 **HTML-only**
 
 - `{products}`

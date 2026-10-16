@@ -1,8 +1,8 @@
 Bonjour {firstname} {lastname},
 
-Merci pour votre demande d'offre sur {shop_name} !
+Merci pour votre demande sur {shop_name} !
 
-Offre : {order_name} du {date}
+Demande d'offre : {order_name} du {date}
 
 Référence	Produit	Prix unitaire	Quantité	Prix total{products_txt}
 {discounts_txt}
@@ -13,6 +13,7 @@ Emballage cadeau : {total_wrapping}
 Livraison : {total_shipping}
 Dont taxes : {total_tax_paid}
 Total : {total_paid}
+Tous les prix sont indiqués hors TVA.
 
 Transporteur : {carrier}
 
@@ -22,7 +23,7 @@ Adresse de livraison :
 Adresse de facturation :
 {invoice_block_txt}
 
-Nous vous enverrons une offre concrète dans les meilleurs délais. Vous pouvez suivre votre demande dans la section « Historique et détails des commandes » de votre compte client :
+Nous vous enverrons une offre concrète dans les meilleurs délais. Vous pouvez suivre l'état de votre demande dans la section « Historique et détails des commandes » de votre compte client.
 {history_url}
 
 {shop_name} – {shop_url}
