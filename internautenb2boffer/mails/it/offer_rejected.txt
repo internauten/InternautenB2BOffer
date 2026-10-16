@@ -1,15 +1,29 @@
-{shop_url}
-
 Ciao {firstname} {lastname},
 
-Purtroppo, la tua offerta è stata rifiutata.
+Purtroppo la tua offerta è stata rifiutata da {shop_name}.
 
-Ordine: {order_name}
-Data: {date}
+Offerta: {order_name} del {date}
 
-Se hai domande, contattaci.
+Riferimento	Prodotto	Prezzo unitario	Quantità	Prezzo totale{products_txt}
+{discounts_txt}
 
-Puoi consultare il tuo ordine nella sezione Cronologia e dettagli ordini del tuo account:
+Prodotti: {total_products}
+Sconti: {total_discounts}
+Confezione regalo: {total_wrapping}
+Spedizione: {total_shipping}
+Totale imposte: {total_tax_paid}
+Totale: {total_paid}
+
+Corriere: {carrier}
+
+Indirizzo di consegna:
+{delivery_block_txt}
+
+Indirizzo di fatturazione:
+{invoice_block_txt}
+
+Se hai domande, contattaci. Puoi consultare il tuo ordine nella sezione «Cronologia e dettagli ordini» del tuo account cliente:
 {history_url}
 
-Grazie per l'interesse dimostrato verso {shop_name}.
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

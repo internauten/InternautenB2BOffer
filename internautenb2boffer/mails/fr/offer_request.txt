@@ -1,38 +1,29 @@
- 
-
-{shop_url}
-
 Bonjour {firstname} {lastname},
 
-Merci pour votre commande sur {shop_name} !
+Merci pour votre demande d'offre sur {shop_name} !
 
-Détails de la demande d'offre
+Offre : {order_name} du {date}
 
-Commande : {order_name} Passée le {date}
+Référence	Produit	Prix unitaire	Quantité	Prix total{products_txt}
+{discounts_txt}
 
-Référence	Produit	Prix unitaire	Quantité	Prix total  {products_txt} {discounts_txt}
-Produits	{total_products}
-Réductions	{total_discounts}
-Emballage cadeau	{total_wrapping}
-Livraison	{total_shipping}
-Dont taxes	{total_tax_paid}
-Total payé	{total_paid}
-
-Livraison
+Produits : {total_products}
+Réductions : {total_discounts}
+Emballage cadeau : {total_wrapping}
+Livraison : {total_shipping}
+Dont taxes : {total_tax_paid}
+Total : {total_paid}
 
 Transporteur : {carrier}
 
-Adresse de livraison
-
+Adresse de livraison :
 {delivery_block_txt}
 
-Adresse de facturation
-
+Adresse de facturation :
 {invoice_block_txt}
 
-Suivez votre demande d'offre dans notre boutique, rendez-vous dans la section [Historique et détails des commandes]({history_url}) de votre compte client.
+Nous vous enverrons une offre concrète dans les meilleurs délais. Vous pouvez suivre votre demande dans la section « Historique et détails des commandes » de votre compte client :
+{history_url}
 
-[{shop_name}]({shop_url})
-
-Propulsé par [PrestaShop](https://www.prestashop.com/?utm_source=marchandprestashop&utm_medium=e-mail&utm_campaign=footer_1-7)
-Copyright die.internauten.ch GmbH
+{shop_name} – {shop_url}
+Propulsé par die.internauten.ch

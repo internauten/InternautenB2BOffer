@@ -23,6 +23,7 @@ Payment module that adds a "Get Offer" payment method. Customers place the order
 - Sends custom emails for "Offer accepted" and "Offer rejected" with full order details.
 - Lets customers place an accepted offer as a new order with one click from their order details page.
 - Back office settings for the email template source and debug logging.
+- Back office email preview: render any module email with the data of an existing order without sending it.
 
 See the [module README](internautenb2boffer/README.md) for usage, configuration, and email template details.
 

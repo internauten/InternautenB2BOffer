@@ -1,14 +1,29 @@
-{shop_url}
-
 Ciao {firstname} {lastname},
 
-La tua offerta è stata accettata.
+La tua offerta è stata accettata da {shop_name}.
 
-Ordine: {order_name}
-Data: {date}
+Offerta: {order_name} del {date}
+
+Riferimento	Prodotto	Prezzo unitario	Quantità	Prezzo totale{products_txt}
+{discounts_txt}
+
+Prodotti: {total_products}
+Sconti: {total_discounts}
+Confezione regalo: {total_wrapping}
+Spedizione: {total_shipping}
+Totale imposte: {total_tax_paid}
 Totale: {total_paid}
 
-Puoi consultare il tuo ordine nella sezione Cronologia e dettagli ordini del tuo account:
+Corriere: {carrier}
+
+Indirizzo di consegna:
+{delivery_block_txt}
+
+Indirizzo di fatturazione:
+{invoice_block_txt}
+
+Puoi consultare il tuo ordine nella sezione «Cronologia e dettagli ordini» del tuo account cliente:
 {history_url}
 
-Grazie per aver acquistato su {shop_name}.
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

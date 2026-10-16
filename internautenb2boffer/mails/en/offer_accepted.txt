@@ -1,14 +1,29 @@
-{shop_url}
-
 Hi {firstname} {lastname},
 
-Your offer has been accepted.
+Your offer has been accepted by {shop_name}.
 
-Order: {order_name}
-Date: {date}
+Offer: {order_name} from {date}
+
+Reference	Product	Unit price	Quantity	Total price{products_txt}
+{discounts_txt}
+
+Products: {total_products}
+Discounts: {total_discounts}
+Gift-wrapping: {total_wrapping}
+Shipping: {total_shipping}
+Total tax: {total_tax_paid}
 Total: {total_paid}
 
-You can review your order in the Order history and details section of your account:
+Carrier: {carrier}
+
+Delivery address:
+{delivery_block_txt}
+
+Billing address:
+{invoice_block_txt}
+
+You can review your order in the "Order history and details" section of your customer account:
 {history_url}
 
-Thank you for shopping with {shop_name}.
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

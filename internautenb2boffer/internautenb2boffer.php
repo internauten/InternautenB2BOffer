@@ -15,12 +15,15 @@ class Internautenb2boffer extends PaymentModule
     public const DEBUG_CONFIG_KEY = 'INTERNAUTENB2BOFFER_DEBUG_LOGS';
     public const MODULE_MAIL_TPL_CONFIG_KEY = 'INTERNAUTENB2BOFFER_MODULE_MAIL_TPL';
     private const DEBUG_LOG_PREFIX = '[internautenb2boffer] ';
+    private const PREVIEW_TEMPLATES = ['offer_request', 'offer_accepted', 'offer_rejected'];
+    private const PREVIEW_FORMATS = ['html', 'txt'];
+    private const PREVIEW_ORDER_LIMIT = 100;
 
     public function __construct()
     {
         $this->name = 'internautenb2boffer';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.8';
+        $this->version = '1.1.0';
         $this->author = 'die.internauten.ch';
         $this->controllers = ['validation', 'reorder'];
         $this->is_eu_compatible = 1;
@@ -75,7 +78,12 @@ class Internautenb2boffer extends PaymentModule
             ? $this->displayWarning($this->l('Debug logs are currently enabled.'))
             : $this->displayConfirmation($this->l('Debug logs are currently disabled.'));
 
-        return $output . $this->renderConfigForm();
+        $output .= $this->renderConfigForm() . $this->renderEmailPreviewForm();
+        if (Tools::isSubmit('submitInternautenb2bofferPreview')) {
+            $output .= $this->renderEmailPreview();
+        }
+
+        return $output;
     }
 
     public function hookPaymentOptions($params)
@@ -361,6 +369,233 @@ class Internautenb2boffer extends PaymentModule
         return $helper->generateForm([$fieldsForm]);
     }
 
+    private function renderEmailPreviewForm(): string
+    {
+        $orders = $this->getPreviewOrderOptions();
+        if (empty($orders)) {
+            return $this->displayInformation($this->l('No offer orders found for the email preview.'));
+        }
+
+        $languages = [['id' => 0, 'name' => $this->l('Language of the order')]];
+        foreach (Language::getLanguages(true) as $language) {
+            $languages[] = ['id' => (int) $language['id_lang'], 'name' => $language['name']];
+        }
+
+        $fieldsForm = [
+            'form' => [
+                'id_form' => 'internautenb2boffer_preview_form',
+                'legend' => [
+                    'title' => $this->l('Email preview'),
+                    'icon' => 'icon-envelope',
+                ],
+                'description' => $this->l('Renders an email with the data of an existing order. No email is sent.'),
+                'input' => [
+                    [
+                        'type' => 'select',
+                        'label' => $this->l('Order'),
+                        'name' => 'preview_id_order',
+                        'options' => ['query' => $orders, 'id' => 'id', 'name' => 'name'],
+                    ],
+                    [
+                        'type' => 'select',
+                        'label' => $this->l('Template'),
+                        'name' => 'preview_template',
+                        'options' => [
+                            'query' => [
+                                ['id' => 'offer_request', 'name' => $this->l('Offer request')],
+                                ['id' => 'offer_accepted', 'name' => $this->l('Offer accepted')],
+                                ['id' => 'offer_rejected', 'name' => $this->l('Offer rejected')],
+                            ],
+                            'id' => 'id',
+                            'name' => 'name',
+                        ],
+                    ],
+                    [
+                        'type' => 'select',
+                        'label' => $this->l('Format'),
+                        'name' => 'preview_format',
+                        'options' => [
+                            'query' => [
+                                ['id' => 'html', 'name' => $this->l('HTML')],
+                                ['id' => 'txt', 'name' => $this->l('Text')],
+                            ],
+                            'id' => 'id',
+                            'name' => 'name',
+                        ],
+                    ],
+                    [
+                        'type' => 'select',
+                        'label' => $this->l('Language'),
+                        'name' => 'preview_id_lang',
+                        'options' => ['query' => $languages, 'id' => 'id', 'name' => 'name'],
+                    ],
+                ],
+                'submit' => [
+                    'title' => $this->l('Show preview'),
+                    'name' => 'submitInternautenb2bofferPreview',
+                    'id' => 'internautenb2boffer_preview_submit',
+                ],
+            ],
+        ];
+
+        $helper = new HelperForm();
+        $helper->module = $this;
+        $helper->name_controller = $this->name;
+        $helper->identifier = $this->identifier;
+        $helper->submit_action = 'submitInternautenb2bofferPreview';
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+        $helper->default_form_language = (int) Configuration::get('PS_LANG_DEFAULT');
+        $helper->show_toolbar = false;
+        $helper->fields_value = [
+            'preview_id_order' => (int) Tools::getValue('preview_id_order', $orders[0]['id']),
+            'preview_template' => (string) Tools::getValue('preview_template', 'offer_request'),
+            'preview_format' => (string) Tools::getValue('preview_format', 'html'),
+            'preview_id_lang' => (int) Tools::getValue('preview_id_lang', 0),
+        ];
+
+        return $helper->generateForm([$fieldsForm]);
+    }
+
+    private function getPreviewOrderOptions(): array
+    {
+        $rows = Db::getInstance()->executeS(
+            'SELECT o.`id_order`, o.`reference`, o.`date_add`, c.`firstname`, c.`lastname`'
+            . ' FROM `' . _DB_PREFIX_ . 'orders` o'
+            . ' LEFT JOIN `' . _DB_PREFIX_ . 'customer` c ON c.`id_customer` = o.`id_customer`'
+            . ' WHERE o.`module` = \'' . pSQL($this->name) . '\''
+            . Shop::addSqlRestriction(false, 'o')
+            . ' ORDER BY o.`id_order` DESC'
+            . ' LIMIT ' . self::PREVIEW_ORDER_LIMIT
+        );
+
+        $options = [];
+        foreach ($rows ?: [] as $row) {
+            $options[] = [
+                'id' => (int) $row['id_order'],
+                'name' => sprintf(
+                    '#%d – %s – %s %s – %s',
+                    (int) $row['id_order'],
+                    $row['reference'],
+                    $row['firstname'],
+                    $row['lastname'],
+                    $row['date_add']
+                ),
+            ];
+        }
+
+        return $options;
+    }
+
+    private function renderEmailPreview(): string
+    {
+        $template = (string) Tools::getValue('preview_template');
+        $format = (string) Tools::getValue('preview_format');
+        if (!in_array($template, self::PREVIEW_TEMPLATES, true) || !in_array($format, self::PREVIEW_FORMATS, true)) {
+            return $this->displayError($this->l('Invalid preview parameters.'));
+        }
+
+        $order = new Order((int) Tools::getValue('preview_id_order'));
+        if (!Validate::isLoadedObject($order) || $order->module !== $this->name) {
+            return $this->displayError($this->l('Please select a valid order.'));
+        }
+
+        $languageId = (int) Tools::getValue('preview_id_lang');
+        if ($languageId <= 0) {
+            $languageId = (int) $order->id_lang;
+        }
+        if (!Validate::isLoadedObject(new Language($languageId))) {
+            return $this->displayError($this->l('Invalid preview parameters.'));
+        }
+
+        $templateFile = $this->findMailTemplateFile($template, $format, $languageId);
+        if ($templateFile === null) {
+            return $this->displayError($this->l('The email template could not be found.'));
+        }
+
+        $content = (string) file_get_contents($templateFile);
+        if ($format === 'txt') {
+            // Same preprocessing as Mail::send() applies to TXT templates.
+            $content = strip_tags(html_entity_decode($content, ENT_COMPAT, 'utf-8'));
+        }
+
+        $templateVars = array_merge(
+            $this->getOrderEmailTemplateVars($order, new OrderState((int) $order->current_state, $languageId), $languageId),
+            $this->getPreviewShopTemplateVars($order, $languageId)
+        );
+        $rendered = htmlspecialchars(strtr($content, $templateVars), ENT_QUOTES, 'UTF-8');
+
+        $body = $format === 'html'
+            ? '<iframe sandbox="" srcdoc="' . $rendered . '" style="width:100%; height:1000px; border:1px solid #DFDFDF;"></iframe>'
+            : '<pre style="white-space:pre-wrap;">' . $rendered . '</pre>';
+
+        return $this->displayInformation(
+            $this->l('Preview only. No email has been sent.') . ' ' . $this->l('Template file:') . ' '
+            . htmlspecialchars(str_replace(_PS_ROOT_DIR_, '', $templateFile), ENT_QUOTES, 'UTF-8')
+        )
+            . '<div class="panel"><div class="panel-heading">' . $this->l('Email preview') . '</div>' . $body . '</div>';
+    }
+
+    // Mirrors the lookup order of Mail::getTemplateBasePath() and its language fallback.
+    private function findMailTemplateFile(string $template, string $format, int $languageId): ?string
+    {
+        $theme = $this->context->shop->theme ?? null;
+        $themeDirs = [];
+        if ($theme) {
+            $themeDirs[] = _PS_ALL_THEMES_DIR_ . $theme->getName() . '/';
+            if ($theme->get('parent')) {
+                $themeDirs[] = _PS_ALL_THEMES_DIR_ . $theme->get('parent') . '/';
+            }
+        }
+
+        $baseDirs = [];
+        if ($template === 'offer_request' && !(bool) Configuration::get(self::MODULE_MAIL_TPL_CONFIG_KEY)) {
+            foreach ($themeDirs as $themeDir) {
+                $baseDirs[] = $themeDir . 'mails/';
+            }
+            $baseDirs[] = _PS_MAIL_DIR_;
+        }
+        foreach ($themeDirs as $themeDir) {
+            $baseDirs[] = $themeDir . 'modules/' . $this->name . '/mails/';
+        }
+        $baseDirs[] = $this->getLocalPath() . 'mails/';
+
+        $isoCodes = array_unique(array_filter([
+            (string) Language::getIsoById($languageId),
+            (string) Language::getIsoById((int) Configuration::get('PS_LANG_DEFAULT')),
+            'en',
+        ]));
+
+        foreach ($isoCodes as $iso) {
+            foreach ($baseDirs as $baseDir) {
+                $file = $baseDir . basename($iso) . '/' . $template . '.' . $format;
+                if (is_file($file)) {
+                    return $file;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // Variables that Mail::send() adds itself; the logo is a URL here instead of an embedded cid: image.
+    private function getPreviewShopTemplateVars(Order $order, int $languageId): array
+    {
+        $shopId = (int) $order->id_shop;
+        $logo = (string) Configuration::get('PS_LOGO_MAIL', null, null, $shopId);
+        if ($logo === '' || !is_file(_PS_IMG_DIR_ . $logo)) {
+            $logo = (string) Configuration::get('PS_LOGO', null, null, $shopId);
+        }
+        $link = $this->context->link;
+
+        return [
+            '{shop_logo}' => $logo !== '' && is_file(_PS_IMG_DIR_ . $logo) ? $link->getMediaLink(_PS_IMG_ . $logo) : '',
+            '{shop_name}' => Tools::safeOutput((string) Configuration::get('PS_SHOP_NAME', null, null, $shopId)),
+            '{shop_url}' => $link->getPageLink('index', null, $languageId, null, false, $shopId),
+            '{history_url}' => $link->getPageLink('history', null, $languageId, null, false, $shopId),
+        ];
+    }
+
     private function debugLog($message, $severity = 1)
     {
         if (!$this->isDebugEnabled()) {
@@ -546,11 +781,12 @@ class Internautenb2boffer extends PaymentModule
         return $translations;
     }
 
-    private function getOrderEmailTemplateVars(Order $order, OrderState $orderState)
+    private function getOrderEmailTemplateVars(Order $order, OrderState $orderState, ?int $languageId = null)
     {
+        $languageId = $languageId ?? (int) $order->id_lang;
         $customer = new Customer((int) $order->id_customer);
         $currency = new Currency((int) $order->id_currency);
-        $historyUrl = $this->context->link->getPageLink('history', true, (int) $order->id_lang);
+        $historyUrl = $this->context->link->getPageLink('history', true, $languageId);
         $carrier = new Carrier((int) $order->id_carrier);
         $products = $order->getProducts();
         $cartRules = $order->getCartRules();
@@ -561,10 +797,10 @@ class Internautenb2boffer extends PaymentModule
         $productsTxt = $this->buildProductsTxt($products, $currency);
         $discountsHtml = $this->buildDiscountsHtml($cartRules, $currency);
         $discountsTxt = $this->buildDiscountsTxt($cartRules, $currency);
-        $deliveryBlockHtml = $this->formatAddressHtml($deliveryAddress, (int) $order->id_lang);
-        $invoiceBlockHtml = $this->formatAddressHtml($invoiceAddress, (int) $order->id_lang);
-        $deliveryBlockTxt = $this->formatAddressTxt($deliveryAddress, (int) $order->id_lang);
-        $invoiceBlockTxt = $this->formatAddressTxt($invoiceAddress, (int) $order->id_lang);
+        $deliveryBlockHtml = $this->formatAddressHtml($deliveryAddress, $languageId);
+        $invoiceBlockHtml = $this->formatAddressHtml($invoiceAddress, $languageId);
+        $deliveryBlockTxt = $this->formatAddressTxt($deliveryAddress, $languageId);
+        $invoiceBlockTxt = $this->formatAddressTxt($invoiceAddress, $languageId);
 
         $templateVars = [
             '{firstname}' => $customer->firstname,
@@ -572,7 +808,7 @@ class Internautenb2boffer extends PaymentModule
             '{shop_name}' => $this->context->shop->name,
             '{shop_url}' => $this->context->shop->getBaseURL(true),
             '{order_name}' => $order->getUniqReference(),
-            '{date}' => Tools::displayDate($order->date_add, (int) $order->id_lang, true),
+            '{date}' => Tools::displayDate($order->date_add, $languageId, true),
             '{total_paid}' => $this->formatPrice((float) $order->total_paid, $currency),
             '{history_url}' => $historyUrl,
             '{payment}' => $order->payment,

@@ -1,16 +1,29 @@
-{shop_url}
-
 Hallo {firstname} {lastname},
 
-Ihre Offerte wurde angenommen.
+Ihre Offerte wurde von {shop_name} angenommen.
 
-Bestellung: {order_name}
-Datum: {date}
-Total: {total_paid}
+Offerte: {order_name} vom {date}
 
-Sie konnen Ihre Bestellung im Bereich Bestellverlauf und Details einsehen:
+Artikel-Nr.	Artikel	Stückpreis	Menge	Gesamtpreis{products_txt}
+{discounts_txt}
+
+Artikel: {total_products}
+Rabatt: {total_discounts}
+Geschenkverpackung: {total_wrapping}
+Versand: {total_shipping}
+Gesamt MwSt.: {total_tax_paid}
+Gesamt: {total_paid}
+
+Versanddienst: {carrier}
+
+Lieferadresse:
+{delivery_block_txt}
+
+Rechnungsadresse:
+{invoice_block_txt}
+
+Sie können Ihre Bestellung im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos einsehen:
 {history_url}
 
-Vielen Dank fur Ihren Einkauf bei {shop_name} .
-
-Copyright by die.internauten.ch
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

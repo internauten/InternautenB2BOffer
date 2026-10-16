@@ -1,15 +1,29 @@
-{shop_url}
-
 Hi {firstname} {lastname},
 
-Unfortunately, your offer has been rejected.
+Unfortunately, your offer has been rejected by {shop_name}.
 
-Order: {order_name}
-Date: {date}
+Offer: {order_name} from {date}
 
-If you have questions, please contact us.
+Reference	Product	Unit price	Quantity	Total price{products_txt}
+{discounts_txt}
 
-You can review your order in the Order history and details section of your account:
+Products: {total_products}
+Discounts: {total_discounts}
+Gift-wrapping: {total_wrapping}
+Shipping: {total_shipping}
+Total tax: {total_tax_paid}
+Total: {total_paid}
+
+Carrier: {carrier}
+
+Delivery address:
+{delivery_block_txt}
+
+Billing address:
+{invoice_block_txt}
+
+If you have any questions, please contact us. You can review your order in the "Order history and details" section of your customer account:
 {history_url}
 
-Thank you for your interest in {shop_name}.
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

@@ -1,17 +1,29 @@
-{shop_url}
-
 Hallo {firstname} {lastname},
 
-Leider wurde Ihre Offerte abgelehnt.
+Leider wurde Ihre Offerte von {shop_name} abgelehnt.
 
-Bestellung: {order_name}
-Datum: {date}
+Offerte: {order_name} vom {date}
 
-Bei Fragen konnen Sie uns gerne kontaktieren.
+Artikel-Nr.	Artikel	Stückpreis	Menge	Gesamtpreis{products_txt}
+{discounts_txt}
 
-Sie konnen Ihre Bestellung im Bereich Bestellverlauf und Details einsehen:
+Artikel: {total_products}
+Rabatt: {total_discounts}
+Geschenkverpackung: {total_wrapping}
+Versand: {total_shipping}
+Gesamt MwSt.: {total_tax_paid}
+Gesamt: {total_paid}
+
+Versanddienst: {carrier}
+
+Lieferadresse:
+{delivery_block_txt}
+
+Rechnungsadresse:
+{invoice_block_txt}
+
+Bei Fragen können Sie uns gerne kontaktieren. Sie können Ihre Bestellung im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos einsehen:
 {history_url}
 
-Vielen Dank fur Ihr Interesse an {shop_name}.
-
-Copyright by die.internauten.ch
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

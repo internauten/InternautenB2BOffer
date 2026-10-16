@@ -18,6 +18,7 @@ Payment module that adds a "Get Offer" payment method. Customers place the order
 - Sends custom emails for "Offer accepted" and "Offer rejected" with full order details.
 - Lets customers place an accepted offer as a new order with one click from their order details page.
 - Back office settings for the email template source and debug logging.
+- Back office email preview: render any module email with the data of an existing order without sending it.
 
 ## Installation
 
@@ -58,6 +59,19 @@ Back Office: Modules -> Module Manager -> Get Offer -> Configure.
 |---|---|---|---|
 | Use module email templates | `INTERNAUTENB2BOFFER_MODULE_MAIL_TPL` | Module | Controls where the `offer_request` template is loaded from. See [Email templates](#email-templates). |
 | Enable debug logs | `INTERNAUTENB2BOFFER_DEBUG_LOGS` | Disabled | Writes module debug traces to the back office logs. |
+
+### Email preview
+
+The "Email preview" panel on the configuration page renders an email with the data of an existing order. No email is sent.
+
+| Field | Description |
+|---|---|
+| Order | One of the latest 100 orders placed with this module. |
+| Template | `offer_request`, `offer_accepted`, or `offer_rejected`. |
+| Format | HTML or text version of the template. |
+| Language | Language used for the template and the order data. Defaults to the language of the order. |
+
+The template is resolved like a real email (theme overrides first, then the module, with language fallback to the shop default and English). The resolved file path is shown above the preview. The HTML preview is displayed in a sandboxed iframe; the shop logo is loaded by URL instead of being embedded.
 
 ## Hooks
 
@@ -135,6 +149,8 @@ This module ships the following email templates in the module folder:
 | `offer_request` | Order is placed with "Get Offer" (replaces `order_conf`) | Depends on "Use module email templates" |
 | `offer_accepted` | Order status changes to "Offer accepted" | Always the module path |
 | `offer_rejected` | Order status changes to "Offer rejected" | Always the module path |
+
+The HTML templates are plain, hand-written table layouts with inline styles (no MJML output, no external images or fonts). All languages share the same structure, so a change in one template can be copied to the others by only translating the texts.
 
 ### Theme overrides
 
