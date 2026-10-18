@@ -23,7 +23,7 @@ class Internautenb2boffer extends PaymentModule
     {
         $this->name = 'internautenb2boffer';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.2';
+        $this->version = '1.2.0';
         $this->author = 'die.internauten.ch';
         $this->controllers = ['validation', 'reorder'];
         $this->is_eu_compatible = 1;
@@ -877,20 +877,39 @@ class Internautenb2boffer extends PaymentModule
         foreach ($products as $product) {
             $reference = !empty($product['product_reference']) ? $product['product_reference'] : '';
             $name = $product['product_name'] ?? '';
-            $unitPrice = $this->formatPrice((float) ($product['unit_price_tax_excl'] ?? 0), $currency);
+            $prices = $this->getProductLinePrices($product);
+            $rrp = $this->formatPrice($prices['rrp_tax_incl'], $currency);
+            $unitPrice = $this->formatPrice($prices['unit_tax_excl'], $currency);
+            $margin = $this->formatPrice($prices['margin_tax_excl'], $currency);
             $quantity = (int) ($product['product_quantity'] ?? 0);
             $total = $this->formatPrice((float) ($product['total_price_tax_excl'] ?? 0), $currency);
 
             $lines[] = '<tr>'
                 . '<td style="padding: 10px 5px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($reference) . '</td>'
                 . '<td style="padding: 10px 5px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($name) . '</td>'
+                . '<td align="right" style="padding: 10px 5px; border: 1px solid #DFDFDF; text-align: right;">' . $rrp . '</td>'
                 . '<td align="right" style="padding: 10px 5px; border: 1px solid #DFDFDF; text-align: right;">' . $unitPrice . '</td>'
+                . '<td align="right" style="padding: 10px 5px; border: 1px solid #DFDFDF; text-align: right;">' . $margin . '</td>'
                 . '<td align="right" style="padding: 10px 5px; border: 1px solid #DFDFDF; text-align: right;">' . $quantity . '</td>'
                 . '<td align="right" style="padding: 10px 5px; border: 1px solid #DFDFDF; text-align: right;">' . $total . '</td>'
                 . '</tr>';
         }
 
         return implode("\n", $lines);
+    }
+
+    // Uses the prices stored on the order line, so later catalog changes do not alter the email.
+    private function getProductLinePrices(array $product): array
+    {
+        $regularTaxExcl = (float) ($product['original_product_price'] ?? 0);
+        $unitTaxExcl = (float) ($product['unit_price_tax_excl'] ?? 0);
+        $taxRate = (float) ($product['tax_rate'] ?? 0);
+
+        return [
+            'rrp_tax_incl' => $regularTaxExcl * (1 + $taxRate / 100),
+            'unit_tax_excl' => $unitTaxExcl,
+            'margin_tax_excl' => $regularTaxExcl - $unitTaxExcl,
+        ];
     }
 
     private function buildProductsTxt(array $products, Currency $currency)
@@ -903,11 +922,14 @@ class Internautenb2boffer extends PaymentModule
         foreach ($products as $product) {
             $reference = !empty($product['product_reference']) ? $product['product_reference'] : '';
             $name = $product['product_name'] ?? '';
-            $unitPrice = $this->formatPrice((float) ($product['unit_price_tax_excl'] ?? 0), $currency);
+            $prices = $this->getProductLinePrices($product);
+            $rrp = $this->formatPrice($prices['rrp_tax_incl'], $currency);
+            $unitPrice = $this->formatPrice($prices['unit_tax_excl'], $currency);
+            $margin = $this->formatPrice($prices['margin_tax_excl'], $currency);
             $quantity = (int) ($product['product_quantity'] ?? 0);
             $total = $this->formatPrice((float) ($product['total_price_tax_excl'] ?? 0), $currency);
 
-            $lines[] = $reference . "\t" . $name . "\t" . $unitPrice . "\t" . $quantity . "\t" . $total;
+            $lines[] = implode("\t", [$reference, $name, $rrp, $unitPrice, $margin, $quantity, $total]);
         }
 
         return "\n" . implode("\n", $lines);
@@ -925,7 +947,7 @@ class Internautenb2boffer extends PaymentModule
             $value = $this->formatPrice((float) ($rule['value_tax_excl'] ?? 0), $currency);
 
             $lines[] = '<tr class="order_summary">'
-                . '<td colspan="4" style="padding: 10px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($name) . '</td>'
+                . '<td colspan="6" style="padding: 10px; border: 1px solid #DFDFDF;">' . Tools::safeOutput($name) . '</td>'
                 . '<td align="right" style="padding: 10px; border: 1px solid #DFDFDF; text-align: right;">-' . $value . '</td>'
                 . '</tr>';
         }

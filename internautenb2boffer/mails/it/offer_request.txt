@@ -4,7 +4,7 @@ Grazie per la tua richiesta su {shop_name}!
 
 Richiesta di offerta: {order_name} del {date}
 
-Riferimento	Prodotto	Prezzo unitario	Quantità	Prezzo totale{products_txt}
+Riferimento	Prodotto	Prezzo consigliato IVA incl.	Prezzo unitario	Margine	Quantità	Prezzo totale{products_txt}
 {discounts_txt}
 
 Prodotti: {total_products}
@@ -13,7 +13,7 @@ Confezione regalo: {total_wrapping}
 Spedizione: {total_shipping}
 Totale imposte: {total_tax_paid}
 Totale: {total_paid}
-Tutti i prezzi sono IVA esclusa.
+Tutti i prezzi sono IVA esclusa, tranne il prezzo consigliato.
 
 Corriere: {carrier}
 

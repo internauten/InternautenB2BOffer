@@ -32,38 +32,40 @@ License: MIT
                 <tr>
                   <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Riferimento</th>
                   <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Prodotto</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Prezzo consigliato IVA incl.</th>
                   <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Prezzo unitario</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Margine</th>
                   <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Quantità</th>
                   <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Prezzo totale</th>
                 </tr>
                 {products}
                 {discounts}
                 <tr>
-                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Prodotti</td>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Prodotti</td>
                   <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_products}</td>
                 </tr>
                 <tr>
-                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Sconti</td>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Sconti</td>
                   <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_discounts}</td>
                 </tr>
                 <tr>
-                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Confezione regalo</td>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Confezione regalo</td>
                   <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_wrapping}</td>
                 </tr>
                 <tr>
-                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Spedizione</td>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Spedizione</td>
                   <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_shipping}</td>
                 </tr>
                 <tr>
-                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF;">Totale imposte</td>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Totale imposte</td>
                   <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_tax_paid}</td>
                 </tr>
                 <tr>
-                  <td colspan="4" align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">Totale</td>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">Totale</td>
                   <td align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600; text-align:right;">{total_paid}</td>
                 </tr>
               </table>
-              <p style="margin:8px 0 0; font-size:12px; color:#656565;">Tutti i prezzi sono IVA esclusa.</p>
+              <p style="margin:8px 0 0; font-size:12px; color:#656565;">Tutti i prezzi sono IVA esclusa, tranne il prezzo consigliato.</p>
 
               <p style="margin:25px 0;"><strong>Corriere:</strong> {carrier}</p>
 

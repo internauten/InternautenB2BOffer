@@ -192,6 +192,16 @@ You can use the following placeholders in `offer_request`, `offer_accepted`, and
 
 Prices of line items, discounts, and the subtotals `{total_products}`, `{total_discounts}`, `{total_wrapping}`, and `{total_shipping}` are always excluding tax, independent of the customer group's tax display setting. `{total_tax_paid}` is the tax amount and `{total_paid}` the total including tax. For `offer_request`, the module replaces the corresponding core `order_conf` values with these, so all three emails show the same figures.
 
+`{products}` and `{products_txt}` contain these columns per line, all taken from the prices stored on the order line:
+
+| Column | Calculation |
+|---|---|
+| RRP incl. VAT | Regular price excl. tax (`original_product_price`) x (1 + tax rate) |
+| Unit price | Reduced price excl. tax (`unit_price_tax_excl`) |
+| Margin | Regular price excl. tax - reduced price excl. tax, per unit |
+| Quantity | Ordered quantity |
+| Total price | Line total excl. tax |
+
 **HTML-only**
 
 - `{products}`

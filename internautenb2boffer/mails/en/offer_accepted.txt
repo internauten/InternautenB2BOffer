@@ -4,7 +4,7 @@ In response to your request, we are pleased to make you the following offer.
 
 Offer request: {order_name} from {date}
 
-Reference	Product	Unit price	Quantity	Total price{products_txt}
+Reference	Product	RRP incl. VAT	Unit price	Margin	Quantity	Total price{products_txt}
 {discounts_txt}
 
 Products: {total_products}
@@ -13,7 +13,7 @@ Gift-wrapping: {total_wrapping}
 Shipping: {total_shipping}
 Total tax: {total_tax_paid}
 Total: {total_paid}
-All prices excl. VAT.
+All prices excl. VAT, except RRP.
 
 Carrier: {carrier}
 

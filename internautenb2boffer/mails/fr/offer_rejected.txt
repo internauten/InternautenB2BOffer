@@ -4,7 +4,7 @@ Malheureusement, nous ne sommes pas en mesure de vous soumettre une offre pour c
 
 Demande d'offre : {order_name} du {date}
 
-Référence	Produit	Prix unitaire	Quantité	Prix total{products_txt}
+Référence	Produit	PVC TTC	Prix unitaire	Marge	Quantité	Prix total{products_txt}
 {discounts_txt}
 
 Produits : {total_products}
@@ -13,7 +13,7 @@ Emballage cadeau : {total_wrapping}
 Livraison : {total_shipping}
 Dont taxes : {total_tax_paid}
 Total : {total_paid}
-Tous les prix sont indiqués hors TVA.
+Tous les prix sont indiqués hors TVA, sauf le PVC.
 
 Transporteur : {carrier}
 

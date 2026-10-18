@@ -4,7 +4,7 @@ Leider können wir Ihnen kein Angebot für diese Anfrage erstellen.
 
 Angebotsanfrage: {order_name} vom {date}
 
-Artikel-Nr.	Artikel	Stückpreis	Menge	Gesamtpreis{products_txt}
+Artikel-Nr.	Artikel	UVP inkl. MwSt.	Stückpreis	Marge	Menge	Gesamtpreis{products_txt}
 {discounts_txt}
 
 Artikel: {total_products}
@@ -13,7 +13,7 @@ Geschenkverpackung: {total_wrapping}
 Versand: {total_shipping}
 Gesamt MwSt.: {total_tax_paid}
 Gesamt: {total_paid}
-Alle Preise exkl. MwSt.
+Alle Preise exkl. MwSt., ausser UVP.
 
 Versanddienst: {carrier}
 
