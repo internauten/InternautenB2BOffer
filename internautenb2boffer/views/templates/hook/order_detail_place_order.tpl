@@ -1,15 +1,30 @@
+{*
+  Shows the "Place accepted offer" action on the order detail page, an expiry notice, or the order confirmation.
+  Copyright (c) 2026 die.internauten.ch GmbH
+  License: MIT
+*}
 <div class="box">
-  {if $internautenb2boffer_reorder_status != ''}
-    <p class="alert alert-warning">
-      {l s='The offer could not be transferred to checkout. Please contact support.' mod='internautenb2boffer'}
+  {if $internautenb2boffer_offer_state == 'ordered'}
+    <p class="alert alert-success">
+      {l s='Thank you. Your offer has been placed as a binding order. Payment is by invoice.' mod='internautenb2boffer'}
+    </p>
+  {elseif $internautenb2boffer_place_order_url != ''}
+    {if $internautenb2boffer_reorder_status == 'failed'}
+      <p class="alert alert-warning">
+        {l s='The offer could not be ordered. Please contact support.' mod='internautenb2boffer'}
+      </p>
+    {/if}
+    <p>
+      {l s='Your offer has been accepted. You can place this order without changes.' mod='internautenb2boffer'}
+    </p>
+    <p>
+      <a class="btn btn-primary" href="{$internautenb2boffer_place_order_url|escape:'htmlall':'UTF-8'}">
+        {l s='Place accepted offer now' mod='internautenb2boffer'}
+      </a>
+    </p>
+  {else}
+    <p class="alert alert-info">
+      {l s='This offer has expired and can no longer be ordered. Please request a new offer.' mod='internautenb2boffer'}
     </p>
   {/if}
-  <p>
-    {l s='Your offer has been accepted. You can place this order without changes.' mod='internautenb2boffer'}
-  </p>
-  <p>
-    <a class="btn btn-primary" href="{$internautenb2boffer_place_order_url|escape:'htmlall':'UTF-8'}">
-      {l s='Place accepted offer now' mod='internautenb2boffer'}
-    </a>
-  </p>
 </div>

@@ -1,0 +1,30 @@
+Hi {firstname} {lastname},
+
+Thank you for your order. We have received your offer as a binding order.
+
+Order: {order_name} from {date}
+
+Reference	Product	RRP incl. VAT	Unit price	Margin	Quantity	Total price{products_txt}
+{discounts_txt}
+
+Products: {total_products}
+Discounts: {total_discounts}
+Gift-wrapping: {total_wrapping}
+Shipping: {total_shipping}
+Total tax: {total_tax_paid}
+Total: {total_paid}
+All prices excl. VAT, except RRP.
+
+Carrier: {carrier}
+
+Delivery address:
+{delivery_block_txt}
+
+Billing address:
+{invoice_block_txt}
+
+Payment is by invoice. If you have any questions, please contact us. You can review your order in the "Order history and details" section of your customer account.
+{history_url}
+
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

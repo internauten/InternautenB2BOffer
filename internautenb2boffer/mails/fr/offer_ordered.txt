@@ -1,0 +1,30 @@
+Bonjour {firstname} {lastname},
+
+Merci pour votre commande. Nous avons bien reçu votre offre en tant que commande ferme.
+
+Commande : {order_name} du {date}
+
+Référence	Produit	PVC TTC	Prix unitaire	Marge	Quantité	Prix total{products_txt}
+{discounts_txt}
+
+Produits : {total_products}
+Réductions : {total_discounts}
+Emballage cadeau : {total_wrapping}
+Livraison : {total_shipping}
+Dont taxes : {total_tax_paid}
+Total : {total_paid}
+Tous les prix sont indiqués hors TVA, sauf le PVC.
+
+Transporteur : {carrier}
+
+Adresse de livraison :
+{delivery_block_txt}
+
+Adresse de facturation :
+{invoice_block_txt}
+
+Le paiement s'effectue sur facture. Si vous avez des questions, n'hésitez pas à nous contacter. Vous pouvez consulter votre commande dans la section « Historique et détails des commandes » de votre compte client.
+{history_url}
+
+{shop_name} – {shop_url}
+Propulsé par die.internauten.ch

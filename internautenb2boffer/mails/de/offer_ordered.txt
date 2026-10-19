@@ -1,0 +1,30 @@
+Hallo {firstname} {lastname},
+
+Vielen Dank für Ihre Bestellung. Wir haben Ihr Angebot als verbindliche Bestellung erhalten.
+
+Bestellung: {order_name} vom {date}
+
+Artikel-Nr.	Artikel	UVP inkl. MwSt.	Stückpreis	Marge	Menge	Gesamtpreis{products_txt}
+{discounts_txt}
+
+Artikel: {total_products}
+Rabatt: {total_discounts}
+Geschenkverpackung: {total_wrapping}
+Versand: {total_shipping}
+Gesamt MwSt.: {total_tax_paid}
+Gesamt: {total_paid}
+Alle Preise exkl. MwSt., ausser UVP.
+
+Versanddienst: {carrier}
+
+Lieferadresse:
+{delivery_block_txt}
+
+Rechnungsadresse:
+{invoice_block_txt}
+
+Die Zahlung erfolgt auf Rechnung. Bei Fragen können Sie uns gerne kontaktieren. Sie können Ihre Bestellung im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos einsehen.
+{history_url}
+
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

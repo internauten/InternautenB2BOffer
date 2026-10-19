@@ -1,0 +1,30 @@
+Ciao {firstname} {lastname},
+
+Grazie per il tuo ordine. Abbiamo ricevuto la tua offerta come ordine vincolante.
+
+Ordine: {order_name} del {date}
+
+Riferimento	Prodotto	Prezzo consigliato IVA incl.	Prezzo unitario	Margine	Quantità	Prezzo totale{products_txt}
+{discounts_txt}
+
+Prodotti: {total_products}
+Sconti: {total_discounts}
+Confezione regalo: {total_wrapping}
+Spedizione: {total_shipping}
+Totale imposte: {total_tax_paid}
+Totale: {total_paid}
+Tutti i prezzi sono IVA esclusa, tranne il prezzo consigliato.
+
+Corriere: {carrier}
+
+Indirizzo di consegna:
+{delivery_block_txt}
+
+Indirizzo di fatturazione:
+{invoice_block_txt}
+
+Il pagamento avviene tramite fattura. Se hai domande, non esitare a contattarci. Puoi consultare il tuo ordine nella sezione «Cronologia e dettagli ordini» del tuo account cliente.
+{history_url}
+
+{shop_name} – {shop_url}
+Powered by die.internauten.ch

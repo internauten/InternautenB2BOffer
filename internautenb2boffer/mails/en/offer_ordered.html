@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+Customer email sent when an accepted offer has been ordered (English).
+Copyright (c) 2026 die.internauten.ch GmbH
+License: MIT
+-->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Offer ordered</title>
+</head>
+
+<body style="margin:0; padding:0; background-color:#eeeeee; font-family:'Open Sans', Arial, sans-serif; font-size:14px; line-height:22px; color:#363A41;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eeeeee">
+    <tr>
+      <td align="center" style="padding:40px 10px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="max-width:680px; border-radius:4px;">
+          <tr>
+            <td align="center" style="padding:40px 50px 20px;">
+              <a href="{shop_url}" target="_blank"><img src="{shop_logo}" alt="{shop_name}" width="150" style="display:block; border:0; height:auto;"></a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 50px;">
+              <h1 style="margin:0 0 15px; font-size:20px; font-weight:600;">Hi {firstname} {lastname},</h1>
+              <p style="margin:0 0 25px; font-size:16px;">Thank you for your order. We have received your offer as a binding order.</p>
+              <p style="margin:0 0 25px; padding:15px 20px; border:1px solid #DFDFDF; font-size:16px;"><strong>Order:</strong> {order_name} from {date}</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; font-size:12px;">
+                <tr>
+                  <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Reference</th>
+                  <th align="left" style="padding:10px 5px; border:1px solid #DFDFDF;">Product</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">RRP incl. VAT</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Unit price</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Margin</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Quantity</th>
+                  <th align="right" style="padding:10px 5px; border:1px solid #DFDFDF; text-align:right;">Total price</th>
+                </tr>
+                {products}
+                {discounts}
+                <tr>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Products</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_products}</td>
+                </tr>
+                <tr>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Discounts</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_discounts}</td>
+                </tr>
+                <tr>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Gift-wrapping</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_wrapping}</td>
+                </tr>
+                <tr>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Shipping</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_shipping}</td>
+                </tr>
+                <tr>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF;">Total tax</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; text-align:right;">{total_tax_paid}</td>
+                </tr>
+                <tr>
+                  <td colspan="6" align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600;">Total</td>
+                  <td align="right" style="padding:10px; border:1px solid #DFDFDF; font-weight:600; text-align:right;">{total_paid}</td>
+                </tr>
+              </table>
+              <p style="margin:8px 0 0; font-size:12px; color:#656565;">All prices excl. VAT, except RRP.</p>
+
+              <p style="margin:25px 0;"><strong>Carrier:</strong> {carrier}</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="top" width="50%" style="padding-right:8px;">
+                    <p style="margin:0 0 8px; font-weight:600;">Delivery address</p>
+                    <div style="padding:15px; border:1px solid #DFDFDF;">{delivery_block_html}</div>
+                  </td>
+                  <td valign="top" width="50%" style="padding-left:8px;">
+                    <p style="margin:0 0 8px; font-weight:600;">Billing address</p>
+                    <div style="padding:15px; border:1px solid #DFDFDF;">{invoice_block_html}</div>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:25px 0 40px;">Payment is by invoice. If you have any questions, please contact us. You can review your order in the "<a href="{history_url}" target="_blank" style="color:#25B9D7; font-weight:600;">Order history and details</a>" section of your customer account.</p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:20px 0 0; text-align:center;"><a href="{shop_url}" style="color:#656565; font-size:16px; font-weight:600;">{shop_name}</a></p>
+        <p style="margin:5px 0 0; text-align:center; font-size:12px; color:#656565;">Powered by die.internauten.ch</p>
+      </td>
+    </tr>
+  </table>
+</body>
+
+</html>

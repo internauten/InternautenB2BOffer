@@ -21,7 +21,8 @@ Payment module that adds a "Get Offer" payment method. Customers place the order
 - Custom order confirmation message for this payment method.
 - Replaces the standard order confirmation email with an "Offer request" email.
 - Sends custom emails for "Offer accepted" and "Offer rejected" with full order details.
-- Lets customers place an accepted offer as a new order with one click from their order details page.
+- Lets customers order an accepted offer from their order details page or order history, within a configurable number of days after acceptance. The existing order is reused and switched to payment by invoice.
+- Cancels rejected offers automatically so their reserved stock is released.
 - Back office settings for the email template source and debug logging.
 - Back office email preview: render any module email with the data of an existing order without sending it.
 

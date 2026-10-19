@@ -14,8 +14,15 @@ class Internautenb2boffer extends PaymentModule
 {
     public const DEBUG_CONFIG_KEY = 'INTERNAUTENB2BOFFER_DEBUG_LOGS';
     public const MODULE_MAIL_TPL_CONFIG_KEY = 'INTERNAUTENB2BOFFER_MODULE_MAIL_TPL';
+    public const OFFER_VALIDITY_DAYS_CONFIG_KEY = 'INTERNAUTENB2BOFFER_OFFER_VALIDITY_DAYS';
+    public const OFFER_VALIDITY_DAYS_DEFAULT = 30;
+    public const OFFER_STATE_NONE = 'none';
+    public const OFFER_STATE_ORDERABLE = 'orderable';
+    public const OFFER_STATE_EXPIRED = 'expired';
+    public const OS_OFFER_ORDERED_CONFIG_KEY = 'INTERNAUTENB2BOFFER_OS_OFFER_ORDERED';
+    private const INVOICE_PAYMENT_MODULE = 'invoicepayment';
     private const DEBUG_LOG_PREFIX = '[internautenb2boffer] ';
-    private const PREVIEW_TEMPLATES = ['offer_request', 'offer_accepted', 'offer_rejected'];
+    private const PREVIEW_TEMPLATES = ['offer_request', 'offer_accepted', 'offer_rejected', 'offer_ordered'];
     private const PREVIEW_FORMATS = ['html', 'txt'];
     private const PREVIEW_ORDER_LIMIT = 100;
 
@@ -23,7 +30,7 @@ class Internautenb2boffer extends PaymentModule
     {
         $this->name = 'internautenb2boffer';
         $this->tab = 'payments_gateways';
-        $this->version = '1.2.0';
+        $this->version = '2.0.0';
         $this->author = 'die.internauten.ch';
         $this->controllers = ['validation', 'reorder'];
         $this->is_eu_compatible = 1;
@@ -47,8 +54,11 @@ class Internautenb2boffer extends PaymentModule
             && $this->registerHook('actionEmailSendBefore')
             && $this->moveEmailHookToFirstPosition()
             && $this->registerHook('actionOrderStatusPostUpdate')
+            && $this->registerHook('actionPresentOrder')
+            && $this->registerHook('actionOrderHistoryAddAfter')
             && Configuration::updateValue(self::DEBUG_CONFIG_KEY, 0)
             && Configuration::updateValue(self::MODULE_MAIL_TPL_CONFIG_KEY, 1)
+            && Configuration::updateValue(self::OFFER_VALIDITY_DAYS_CONFIG_KEY, self::OFFER_VALIDITY_DAYS_DEFAULT)
             && $this->installOrderStates();
     }
 
@@ -56,6 +66,7 @@ class Internautenb2boffer extends PaymentModule
     {
         Configuration::deleteByName(self::DEBUG_CONFIG_KEY);
         Configuration::deleteByName(self::MODULE_MAIL_TPL_CONFIG_KEY);
+        Configuration::deleteByName(self::OFFER_VALIDITY_DAYS_CONFIG_KEY);
 
         return $this->keepOrderStates()
             && parent::uninstall();
@@ -66,11 +77,17 @@ class Internautenb2boffer extends PaymentModule
         $output = '';
 
         if (Tools::isSubmit('submitInternautenb2bofferConfig')) {
-            $enabled = (int) Tools::getValue(self::DEBUG_CONFIG_KEY, 0);
-            Configuration::updateValue(self::DEBUG_CONFIG_KEY, $enabled);
-            $useModuleTpl = (int) Tools::getValue(self::MODULE_MAIL_TPL_CONFIG_KEY, 1);
-            Configuration::updateValue(self::MODULE_MAIL_TPL_CONFIG_KEY, $useModuleTpl);
-            $output .= $this->displayConfirmation($this->l('Settings updated.'));
+            $validityDays = trim((string) Tools::getValue(self::OFFER_VALIDITY_DAYS_CONFIG_KEY, ''));
+            if (!ctype_digit($validityDays)) {
+                $output .= $this->displayError($this->l('Offer validity must be a whole number of 0 or more.'));
+            } else {
+                $enabled = (int) Tools::getValue(self::DEBUG_CONFIG_KEY, 0);
+                Configuration::updateValue(self::DEBUG_CONFIG_KEY, $enabled);
+                $useModuleTpl = (int) Tools::getValue(self::MODULE_MAIL_TPL_CONFIG_KEY, 1);
+                Configuration::updateValue(self::MODULE_MAIL_TPL_CONFIG_KEY, $useModuleTpl);
+                Configuration::updateValue(self::OFFER_VALIDITY_DAYS_CONFIG_KEY, (int) $validityDays);
+                $output .= $this->displayConfirmation($this->l('Settings updated.'));
+            }
         }
 
         $isDebugEnabled = (bool) Configuration::get(self::DEBUG_CONFIG_KEY);
@@ -157,29 +174,163 @@ class Internautenb2boffer extends PaymentModule
             return '';
         }
 
-        if ($order->module !== $this->name) {
-            return '';
-        }
-
-        $acceptedId = (int) Configuration::get('INTERNAUTENB2BOFFER_OS_OFFER_ACCEPTED');
-        if ($acceptedId <= 0 || (int) $order->current_state !== $acceptedId) {
+        $status = (string) Tools::getValue('offer_reorder', '');
+        $offerState = $this->getOfferState($order);
+        $justOrdered = $status === 'ordered'
+            && (int) $order->current_state === (int) Configuration::get(self::OS_OFFER_ORDERED_CONFIG_KEY);
+        if ($offerState === self::OFFER_STATE_NONE && !$justOrdered) {
             return '';
         }
 
         $this->smarty->assign([
-            'internautenb2boffer_place_order_url' => $this->context->link->getModuleLink(
-                $this->name,
-                'reorder',
-                [
-                    'id_order' => (int) $order->id,
-                    'key' => (string) $order->secure_key,
-                ],
-                true
-            ),
-            'internautenb2boffer_reorder_status' => (string) Tools::getValue('offer_reorder', ''),
+            'internautenb2boffer_place_order_url' => $offerState === self::OFFER_STATE_ORDERABLE ? $this->getPlaceOfferUrl($order) : '',
+            'internautenb2boffer_reorder_status' => $status,
+            'internautenb2boffer_offer_state' => $justOrdered ? 'ordered' : $offerState,
         ]);
 
         return $this->fetch('module:internautenb2boffer/views/templates/hook/order_detail_place_order.tpl');
+    }
+
+    // Exposes $order.internautenb2boffer to theme templates such as customer/history.tpl.
+    public function hookActionPresentOrder($params)
+    {
+        $presentedOrder = $params['presentedOrder'] ?? null;
+        if (!$this->active || !is_object($presentedOrder) || !method_exists($presentedOrder, 'appendArray')) {
+            return;
+        }
+
+        if ((string) ($presentedOrder['details']['module'] ?? '') !== $this->name) {
+            return;
+        }
+
+        $order = new Order((int) $presentedOrder['details']['id']);
+        if (
+            !Validate::isLoadedObject($order)
+            || !$this->context->customer
+            || (int) $order->id_customer !== (int) $this->context->customer->id
+        ) {
+            return;
+        }
+
+        $offerState = $this->getOfferState($order);
+        if ($offerState === self::OFFER_STATE_NONE) {
+            return;
+        }
+
+        $isOrderable = $offerState === self::OFFER_STATE_ORDERABLE;
+        $presentedOrder->appendArray([
+            'internautenb2boffer' => [
+                'place_offer_url' => $isOrderable ? $this->getPlaceOfferUrl($order) : '',
+                'label' => $isOrderable ? $this->l('Order offer') : $this->l('Offer expired'),
+            ],
+        ]);
+    }
+
+    // Runs after the history row is saved; cancelling earlier would be overwritten by the core status change.
+    public function hookActionOrderHistoryAddAfter($params)
+    {
+        $history = $params['order_history'] ?? null;
+        $rejectedId = (int) Configuration::get('INTERNAUTENB2BOFFER_OS_OFFER_REJECTED');
+        $canceledId = (int) Configuration::get('PS_OS_CANCELED');
+        if (
+            !$history instanceof OrderHistory || $rejectedId <= 0 || $canceledId <= 0
+            || (int) $history->id_order_state !== $rejectedId
+        ) {
+            return;
+        }
+
+        $order = new Order((int) $history->id_order);
+        if (Validate::isLoadedObject($order) && $order->module === $this->name) {
+            $this->cancelOrderSilently($order);
+        }
+    }
+
+    // Releases reserved stock: the core only excludes cancelled/error/shipped orders from reservations.
+    public function cancelOrderSilently(Order $order): bool
+    {
+        $canceledId = (int) Configuration::get('PS_OS_CANCELED');
+        if ($canceledId <= 0 || (int) $order->current_state === $canceledId) {
+            return false;
+        }
+
+        $history = new OrderHistory();
+        $history->id_order = (int) $order->id;
+        $history->id_employee = 0;
+        $history->changeIdOrderState($canceledId, $order);
+        $saved = (bool) $history->add();
+        $this->debugLog('cancelOrderSilently order=' . (int) $order->id . ' success=' . (int) $saved);
+
+        return $saved;
+    }
+
+    // Turns the accepted offer into a binding order on the same order record (no new cart or order).
+    public function placeAcceptedOffer(Order $order): bool
+    {
+        $orderedId = (int) Configuration::get(self::OS_OFFER_ORDERED_CONFIG_KEY);
+        if ($orderedId <= 0 || $this->getOfferState($order) !== self::OFFER_STATE_ORDERABLE) {
+            return false;
+        }
+
+        $invoiceModule = Module::getInstanceByName(self::INVOICE_PAYMENT_MODULE);
+        if ($invoiceModule instanceof PaymentModule && $invoiceModule->active) {
+            $order->module = $invoiceModule->name;
+            $order->payment = $invoiceModule->displayName;
+            $order->update();
+        } else {
+            $this->debugLog('placeAcceptedOffer:invoice_payment_unavailable order=' . (int) $order->id, 2);
+        }
+
+        $history = new OrderHistory();
+        $history->id_order = (int) $order->id;
+        $history->id_employee = 0;
+        $history->changeIdOrderState($orderedId, $order);
+        if (!$history->add()) {
+            $this->debugLog('placeAcceptedOffer:history_failed order=' . (int) $order->id, 3);
+
+            return false;
+        }
+
+        $this->sendOfferMail($order, 'offer_ordered', $this->l('Offer ordered'));
+
+        return true;
+    }
+
+    public function getOfferState(Order $order): string
+    {
+        $acceptedId = (int) Configuration::get('INTERNAUTENB2BOFFER_OS_OFFER_ACCEPTED');
+        if ($order->module !== $this->name || $acceptedId <= 0 || (int) $order->current_state !== $acceptedId) {
+            return self::OFFER_STATE_NONE;
+        }
+
+        $validityDays = (int) Configuration::get(self::OFFER_VALIDITY_DAYS_CONFIG_KEY);
+        if ($validityDays <= 0) {
+            return self::OFFER_STATE_ORDERABLE;
+        }
+
+        $acceptedAt = (string) Db::getInstance()->getValue(
+            'SELECT MAX(`date_add`) FROM `' . _DB_PREFIX_ . 'order_history`'
+            . ' WHERE `id_order` = ' . (int) $order->id . ' AND `id_order_state` = ' . $acceptedId
+        );
+        if ($acceptedAt === '') {
+            $acceptedAt = (string) $order->date_upd;
+        }
+
+        $expiresAt = strtotime($acceptedAt . ' +' . $validityDays . ' days');
+
+        return $expiresAt !== false && time() <= $expiresAt ? self::OFFER_STATE_ORDERABLE : self::OFFER_STATE_EXPIRED;
+    }
+
+    private function getPlaceOfferUrl(Order $order): string
+    {
+        return $this->context->link->getModuleLink(
+            $this->name,
+            'reorder',
+            [
+                'id_order' => (int) $order->id,
+                'key' => (string) $order->secure_key,
+            ],
+            true
+        );
     }
 
     public function hookActionEmailSendBefore($params)
@@ -257,13 +408,18 @@ class Internautenb2boffer extends PaymentModule
             ? $this->l('Offer accepted')
             : $this->l('Offer rejected');
 
-        $orderState = new OrderState($newStatusId);
-        $templateVars = $this->getOrderEmailTemplateVars($order, $orderState);
+        $this->sendOfferMail($order, $template, $subject);
+    }
+
+    private function sendOfferMail(Order $order, string $template, string $subject): bool
+    {
+        $templateVars = $this->getOrderEmailTemplateVars($order, new OrderState((int) $order->current_state));
 
         $customer = new Customer((int) $order->id_customer);
         if (!Validate::isLoadedObject($customer)) {
-            $this->debugLog('hookActionOrderStatusPostUpdate:customer_not_loaded order=' . (int) $order->id);
-            return;
+            $this->debugLog('sendOfferMail:customer_not_loaded order=' . (int) $order->id);
+
+            return false;
         }
 
         $sent = Mail::Send(
@@ -283,11 +439,13 @@ class Internautenb2boffer extends PaymentModule
         );
 
         $this->debugLog(
-            'hookActionOrderStatusPostUpdate:mail_sent order=' . (int) $order->id
+            'sendOfferMail:mail_sent order=' . (int) $order->id
             . ' template=' . $template
             . ' to=' . $customer->email
             . ' success=' . (int) $sent
         );
+
+        return (bool) $sent;
     }
 
     public function checkCurrency($cart)
@@ -309,10 +467,17 @@ class Internautenb2boffer extends PaymentModule
         $fieldsForm = [
             'form' => [
                 'legend' => [
-                    'title' => $this->l('Debug settings'),
+                    'title' => $this->l('Settings'),
                     'icon' => 'icon-cogs',
                 ],
                 'input' => [
+                    [
+                        'type' => 'text',
+                        'label' => $this->l('Offer validity (days)'),
+                        'name' => self::OFFER_VALIDITY_DAYS_CONFIG_KEY,
+                        'desc' => $this->l('Number of days after acceptance during which the customer can order an accepted offer. 0 = no limit.'),
+                        'class' => 'fixed-width-sm',
+                    ],
                     [
                         'type' => 'switch',
                         'label' => $this->l('Use module email templates'),
@@ -372,6 +537,7 @@ class Internautenb2boffer extends PaymentModule
         $helper->show_toolbar = false;
         $helper->fields_value[self::MODULE_MAIL_TPL_CONFIG_KEY] = (int) Configuration::get(self::MODULE_MAIL_TPL_CONFIG_KEY);
         $helper->fields_value[self::DEBUG_CONFIG_KEY] = (int) Configuration::get(self::DEBUG_CONFIG_KEY);
+        $helper->fields_value[self::OFFER_VALIDITY_DAYS_CONFIG_KEY] = (int) Configuration::get(self::OFFER_VALIDITY_DAYS_CONFIG_KEY);
 
         return $helper->generateForm([$fieldsForm]);
     }
@@ -412,6 +578,7 @@ class Internautenb2boffer extends PaymentModule
                                 ['id' => 'offer_request', 'name' => $this->l('Offer request')],
                                 ['id' => 'offer_accepted', 'name' => $this->l('Offer accepted')],
                                 ['id' => 'offer_rejected', 'name' => $this->l('Offer rejected')],
+                                ['id' => 'offer_ordered', 'name' => $this->l('Offer ordered')],
                             ],
                             'id' => 'id',
                             'name' => 'name',
@@ -464,13 +631,33 @@ class Internautenb2boffer extends PaymentModule
         return $helper->generateForm([$fieldsForm]);
     }
 
+    // Ordered offers switch to the invoice payment module, so they are recognised by their offer state history.
+    private function getOfferOrderSqlCondition(string $alias): string
+    {
+        $orderedId = (int) Configuration::get(self::OS_OFFER_ORDERED_CONFIG_KEY);
+
+        return '(' . $alias . '.`module` = \'' . pSQL($this->name) . '\''
+            . ($orderedId > 0
+                ? ' OR EXISTS (SELECT 1 FROM `' . _DB_PREFIX_ . 'order_history` oh WHERE oh.`id_order` = ' . $alias . '.`id_order` AND oh.`id_order_state` = ' . $orderedId . ')'
+                : '')
+            . ')';
+    }
+
+    private function isOfferOrder(Order $order): bool
+    {
+        return (bool) Db::getInstance()->getValue(
+            'SELECT 1 FROM `' . _DB_PREFIX_ . 'orders` o WHERE o.`id_order` = ' . (int) $order->id
+            . ' AND ' . $this->getOfferOrderSqlCondition('o')
+        );
+    }
+
     private function getPreviewOrderOptions(): array
     {
         $rows = Db::getInstance()->executeS(
             'SELECT o.`id_order`, o.`reference`, o.`date_add`, c.`firstname`, c.`lastname`'
             . ' FROM `' . _DB_PREFIX_ . 'orders` o'
             . ' LEFT JOIN `' . _DB_PREFIX_ . 'customer` c ON c.`id_customer` = o.`id_customer`'
-            . ' WHERE o.`module` = \'' . pSQL($this->name) . '\''
+            . ' WHERE ' . $this->getOfferOrderSqlCondition('o')
             . Shop::addSqlRestriction(false, 'o')
             . ' ORDER BY o.`id_order` DESC'
             . ' LIMIT ' . self::PREVIEW_ORDER_LIMIT
@@ -503,7 +690,7 @@ class Internautenb2boffer extends PaymentModule
         }
 
         $order = new Order((int) Tools::getValue('preview_id_order'));
-        if (!Validate::isLoadedObject($order) || $order->module !== $this->name) {
+        if (!Validate::isLoadedObject($order) || !$this->isOfferOrder($order)) {
             return $this->displayError($this->l('Please select a valid order.'));
         }
 
@@ -686,6 +873,14 @@ class Internautenb2boffer extends PaymentModule
                 '#B1001A',
                 false,
                 null
+            )
+            && $this->ensureOrderState(
+                self::OS_OFFER_ORDERED_CONFIG_KEY,
+                'ordered',
+                '#8A2BE2',
+                false,
+                null,
+                true
             );
     }
 
@@ -694,7 +889,7 @@ class Internautenb2boffer extends PaymentModule
         return true;
     }
 
-    private function ensureOrderState($configKey, $stateKey, $color, $sendEmail, $template)
+    private function ensureOrderState($configKey, $stateKey, $color, $sendEmail, $template, bool $logable = false)
     {
         $existingId = (int) Configuration::get($configKey);
         if ($existingId > 0) {
@@ -703,6 +898,7 @@ class Internautenb2boffer extends PaymentModule
                 $existingState->send_email = (bool) $sendEmail;
                 $existingState->template = $template ?: '';
                 $existingState->color = $color;
+                $existingState->logable = $logable;
                 $existingState->module_name = $this->name;
                 $existingState->deleted = false;
 
@@ -725,7 +921,7 @@ class Internautenb2boffer extends PaymentModule
         $orderState->color = $color;
         $orderState->hidden = false;
         $orderState->delivery = false;
-        $orderState->logable = false;
+        $orderState->logable = $logable;
         $orderState->invoice = false;
         $orderState->paid = false;
         $orderState->module_name = $this->name;
@@ -761,6 +957,7 @@ class Internautenb2boffer extends PaymentModule
         $source = match ($stateKey) {
             'accepted' => 'Offer accepted',
             'rejected' => 'Offer rejected',
+            'ordered' => 'Offer ordered',
             default => 'Awaiting Get Offer',
         };
 

@@ -12,11 +12,12 @@ Payment module that adds a "Get Offer" payment method. Customers place the order
 
 - Adds a checkout payment method: Get Offer.
 - Creates a pending order in "Awaiting Get Offer" state.
-- Adds two extra order states for your workflow: "Offer accepted" and "Offer rejected".
+- Adds extra order states for your workflow: "Offer accepted", "Offer rejected", and "Offer ordered".
 - Custom order confirmation message for this payment method.
 - Replaces the standard order confirmation email (`order_conf`) with an "Offer request" email for orders placed with this payment method.
-- Sends custom emails for "Offer accepted" and "Offer rejected" with full order details.
-- Lets customers place an accepted offer as a new order with one click from their order details page.
+- Sends custom emails for "Offer accepted", "Offer rejected", and "Offer ordered" with full order details.
+- Lets customers order an accepted offer from their order details page or order history, within a configurable number of days after acceptance. The existing order is reused (no new cart or order) and switched to payment by invoice.
+- Cancels rejected offers automatically so their reserved stock is released.
 - Back office settings for the email template source and debug logging.
 - Back office email preview: render any module email with the data of an existing order without sending it.
 
@@ -35,21 +36,45 @@ The "Get Offer" payment option is only shown for currencies enabled for this mod
 1. Customer selects "Get Offer" at checkout and completes the order.
 2. The order is created with status "Awaiting Get Offer" and the customer receives the "Offer request" email.
 3. You review the order and switch it to "Offer accepted" or "Offer rejected" in the order status dropdown. The customer receives the matching email.
-4. For accepted offers, see [Place accepted offer](#place-accepted-offer).
+4. A rejected offer is then set to the standard "Canceled" status automatically (without a further email), which releases its reserved stock.
+5. For accepted offers, see [Place accepted offer](#place-accepted-offer).
 
 Note: Uninstalling the module keeps the custom order states so historical orders remain readable.
 
 ## Place accepted offer
 
-When an order has the status "Offer accepted", the logged-in customer sees a "Place accepted offer now" button on the order details page in their account.
+When an order has the status "Offer accepted", the logged-in customer sees a "Place accepted offer now" button on the order details page and an "Order offer" link in the order history of their account.
+
+The offer can only be ordered within the number of days set in "Offer validity (days)", counted from the date the order was set to "Offer accepted". After that, the order details page shows an expiry notice and the order history shows "Offer expired" instead of the link. A value of 0 disables the limit.
 
 Clicking the button:
 
-1. Verifies that the order belongs to the customer, was placed with this module, matches the order's secure key, and is still in "Offer accepted" state.
-2. Duplicates the original cart (same flow as the PrestaShop reorder function). If duplication fails, the cart is rebuilt from the order lines.
-3. Redirects the customer to checkout with the new cart, where the order can be completed with a regular payment method.
+1. Verifies that the order belongs to the customer, was placed with this module, matches the order's secure key, is still in "Offer accepted" state, and has not expired.
+2. Shows a confirmation page with the offer reference, total, and "Payment: by invoice".
+3. After confirmation, the existing order is reused: no new cart or order is created, so prices, discounts, addresses, and the reserved stock stay as in the offer.
+   - The payment method is switched to the `invoicepayment` module ("Payment by invoice"). If that module is not installed or inactive, the payment method is left unchanged and a debug log entry is written.
+   - The order status is set to "Offer ordered" (counts as a valid order; not paid, not shipped, no invoice yet).
+   - The customer receives the `offer_ordered` email and returns to the order details page with a confirmation.
 
-If the cart cannot be transferred, the order details page shows a warning asking the customer to contact support.
+Orders switched to `invoicepayment` are not registered for its payment reminders, and its customer group rules are not checked.
+
+If the order cannot be placed, the order details page shows a warning asking the customer to contact support.
+
+### Order history (theme change required)
+
+The order history template (`customer/history.tpl`) has no module hook. The module adds the data to each presented order via `actionPresentOrder`; the theme has to display it. Add this to the order actions in `themes/<theme>/templates/customer/history.tpl` (or a child theme override):
+
+```smarty
+{if isset($order.internautenb2boffer)}
+  {if $order.internautenb2boffer.place_offer_url}
+    <a href="{$order.internautenb2boffer.place_offer_url}">{$order.internautenb2boffer.label}</a>
+  {else}
+    <span class="text-muted">{$order.internautenb2boffer.label}</span>
+  {/if}
+{/if}
+```
+
+`$order.internautenb2boffer` only exists for orders of this module in "Offer accepted" state that belong to the logged-in customer. `label` is already translated ("Order offer" or "Offer expired").
 
 ## Configuration
 
@@ -58,6 +83,7 @@ Back Office: Modules -> Module Manager -> Get Offer -> Configure.
 | Setting | Configuration key | Default | Description |
 |---|---|---|---|
 | Use module email templates | `INTERNAUTENB2BOFFER_MODULE_MAIL_TPL` | Module | Controls where the `offer_request` template is loaded from. See [Email templates](#email-templates). |
+| Offer validity (days) | `INTERNAUTENB2BOFFER_OFFER_VALIDITY_DAYS` | 30 | Days after acceptance during which an accepted offer can be ordered. 0 = no limit. See [Place accepted offer](#place-accepted-offer). |
 | Enable debug logs | `INTERNAUTENB2BOFFER_DEBUG_LOGS` | Disabled | Writes module debug traces to the back office logs. |
 
 ### Email preview
@@ -67,7 +93,7 @@ The "Email preview" panel on the configuration page renders an email with the da
 | Field | Description |
 |---|---|
 | Order | One of the latest 100 orders placed with this module. |
-| Template | `offer_request`, `offer_accepted`, or `offer_rejected`. |
+| Template | `offer_request`, `offer_accepted`, `offer_rejected`, or `offer_ordered`. |
 | Format | HTML or text version of the template. |
 | Language | Language used for the template and the order data. Defaults to the language of the order. |
 
@@ -81,11 +107,13 @@ The module registers the following hooks on installation:
 |---|---|
 | `paymentOptions` | Adds the "Get Offer" payment option at checkout (only for allowed currencies). |
 | `paymentReturn` | Shows the custom confirmation message on the order confirmation page. |
-| `displayOrderDetail` | Shows the "Place accepted offer now" button on the customer's order details page for orders in "Offer accepted" state. |
+| `displayOrderDetail` | Shows the "Place accepted offer now" button (or an expiry notice) on the customer's order details page for orders in "Offer accepted" state. |
+| `actionPresentOrder` | Adds `$order.internautenb2boffer` (order link or expiry label) to presented orders, used by the order history template. |
 | `actionEmailSendBefore` | Replaces the `order_conf` email with `offer_request` for orders placed with this module. |
 | `actionOrderStatusPostUpdate` | Sends the `offer_accepted` or `offer_rejected` email when the order status changes accordingly. |
+| `actionOrderHistoryAddAfter` | Sets a rejected offer to "Canceled" right after "Offer rejected" is saved, to release reserved stock. |
 
-`displayOrderDetail` was added in version 1.0.7 and is registered for existing installations by `upgrade/upgrade-1.0.7.php`.
+`displayOrderDetail` was added in version 1.0.7 and is registered for existing installations by `upgrade/upgrade-1.0.7.php`. `actionPresentOrder` and the offer validity setting were added in version 1.3.0 by `upgrade/upgrade-1.3.0.php`. `actionOrderHistoryAddAfter` and the "Offer ordered" state were added in version 2.0.0 by `upgrade/upgrade-2.0.0.php`, which also cancels offers that were already rejected.
 
 `actionEmailSendBefore` must run before mail transport modules (e.g. `internautengraph`) that send the email within this hook and stop the core flow. Otherwise the customer receives the standard "Order confirmation" instead of the "Offer request". The module therefore moves itself to the first position of this hook on installation and when upgrading to 1.0.8. If you reorder the hook in Design -> Positions, keep this module first.
 
@@ -125,30 +153,39 @@ This module ships the following email templates in the module folder:
 - `mails/en/offer_accepted.txt`
 - `mails/en/offer_rejected.html`
 - `mails/en/offer_rejected.txt`
+- `mails/en/offer_ordered.html`
+- `mails/en/offer_ordered.txt`
 - `mails/de/offer_request.html`
 - `mails/de/offer_request.txt`
 - `mails/de/offer_accepted.html`
 - `mails/de/offer_accepted.txt`
 - `mails/de/offer_rejected.html`
 - `mails/de/offer_rejected.txt`
+- `mails/de/offer_ordered.html`
+- `mails/de/offer_ordered.txt`
 - `mails/fr/offer_request.html`
 - `mails/fr/offer_request.txt`
 - `mails/fr/offer_accepted.html`
 - `mails/fr/offer_accepted.txt`
 - `mails/fr/offer_rejected.html`
 - `mails/fr/offer_rejected.txt`
+- `mails/fr/offer_ordered.html`
+- `mails/fr/offer_ordered.txt`
 - `mails/it/offer_request.html`
 - `mails/it/offer_request.txt`
 - `mails/it/offer_accepted.html`
 - `mails/it/offer_accepted.txt`
 - `mails/it/offer_rejected.html`
 - `mails/it/offer_rejected.txt`
+- `mails/it/offer_ordered.html`
+- `mails/it/offer_ordered.txt`
 
 | Email | Sent when | Template source |
 |---|---|---|
 | `offer_request` | Order is placed with "Get Offer" (replaces `order_conf`) | Depends on "Use module email templates" |
 | `offer_accepted` | Order status changes to "Offer accepted" | Always the module path |
 | `offer_rejected` | Order status changes to "Offer rejected" | Always the module path |
+| `offer_ordered` | Customer orders an accepted offer | Always the module path |
 
 The HTML templates are plain, hand-written table layouts with inline styles (no MJML output, no external images or fonts). All languages share the same structure, so a change in one template can be copied to the others by only translating the texts.
 
@@ -162,6 +199,8 @@ For templates loaded from the module path, PrestaShop first looks in the active 
 - `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_accepted.txt`
 - `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_rejected.html`
 - `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_rejected.txt`
+- `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_ordered.html`
+- `themes/<active_theme>/modules/internautenb2boffer/mails/<lang>/offer_ordered.txt`
 
 If "Use module email templates" is set to "Theme / Default", `offer_request` is resolved like a core email instead: first `themes/<active_theme>/mails/<lang>/`, then the shop's `mails/<lang>/` folder, and finally the module's `mails/` folder as fallback. The following paths apply in that case:
 
@@ -170,7 +209,7 @@ If "Use module email templates" is set to "Theme / Default", `offer_request` is 
 
 ## Template variables
 
-You can use the following placeholders in `offer_request`, `offer_accepted`, and `offer_rejected` templates:
+You can use the following placeholders in `offer_request`, `offer_accepted`, `offer_rejected`, and `offer_ordered` templates:
 
 **Common (HTML and TXT)**
 
