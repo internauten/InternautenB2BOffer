@@ -29,3 +29,7 @@ cache/
 SECRET.md
 AGENTS.local.md
 CLAUDE.local.md
+
+# PrestaShop-generated module config cache
+config.xml
+config_*.xml
