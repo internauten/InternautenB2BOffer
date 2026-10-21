@@ -6,7 +6,8 @@
 <div class="box">
   {if $internautenb2boffer_offer_state == 'ordered'}
     <p class="alert alert-success">
-      {l s='Thank you. Your offer has been placed as a binding order. Payment is by invoice.' mod='internautenb2boffer'}
+      {l s='This offer has been ordered.' mod='internautenb2boffer'}
+      <a href="{$internautenb2boffer_new_order_url|escape:'htmlall':'UTF-8'}">{l s='View order' mod='internautenb2boffer'}</a>
     </p>
   {elseif $internautenb2boffer_place_order_url != ''}
     {if $internautenb2boffer_reorder_status == 'failed'}

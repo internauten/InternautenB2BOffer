@@ -23,7 +23,7 @@ Delivery address:
 Billing address:
 {invoice_block_txt}
 
-Payment is by invoice. If you have any questions, please contact us. You can review your order in the "Order history and details" section of your customer account.
+If you have any questions, please contact us. You can review your order in the "Order history and details" section of your customer account.
 {history_url}
 
 {shop_name} – {shop_url}

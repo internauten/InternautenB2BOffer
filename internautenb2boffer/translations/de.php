@@ -13,7 +13,6 @@ $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_1d3bb92700ca25028
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_2d0952c7dfad480fb4ffe2cb697c3582'] = 'Angebotsanfrage';
 $_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_19e6d0c2e33268b1d203be25d30c21b4'] = 'Ihr Angebot wurde akzeptiert. Sie können diese Bestellung ohne Änderungen aufgeben.';
 $_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_a190b7acabd5578668a4d0787558af1e'] = 'Akzeptierte Offerte jetzt bestellen';
-$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_d949ee1202d06386fd0b6c2eb36fc1ff'] = 'Die Offerte konnte nicht in den Checkout übernommen werden. Bitte kontaktieren Sie den Support.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_7ee3b2771d7428b8336df3080976f649'] = 'E-Mail-Vorlagen aus dem Modul verwenden';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_fb97d9024c8582846d434044e1ecc8d5'] = 'Wenn aktiviert, wird die E-Mail-Vorlage offer_request aus dem Modul-Verzeichnis (mails/) geladen. Wenn deaktiviert, sucht PrestaShop die Vorlage im aktiven Theme oder im Standard-Mail-Verzeichnis.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_e55f75a29310d7b60f7ac1d390c8ae42'] = 'Modul';
@@ -53,12 +52,6 @@ $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_e2a6530d7529c97c1
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_b9835edc07785db3a903c835f49cd473'] = 'Anzahl Tage nach der Annahme, während denen der Kunde ein akzeptiertes Angebot bestellen kann. 0 = keine Begrenzung.';
 $_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_3e82615055af671f2a6187252e3a441a'] = 'Dieses Angebot ist abgelaufen und kann nicht mehr bestellt werden. Bitte fordern Sie ein neues Angebot an.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_5dff2e1deead2b063c4608d2c72fb8f1'] = 'Angebot bestellt';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_cd92bd432a1ef21702f6a9c5c8769044'] = 'Angebot bestellen';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_02eac3b53ab122f6b5d51a25107c636e'] = 'Angebot:';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_66c4c5112f455a19afde47829df363fa'] = 'Gesamt:';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_ddc3e9da52c9e2d189fb42fd1cd064d0'] = 'Zahlung: auf Rechnung';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_bf3f242f76caef5304671a78a062f433'] = 'Möchten Sie dieses Angebot verbindlich bestellen?';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_e25c962bd030206037e41c7cf8fb1792'] = 'Verbindlich bestellen';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_ea4788705e6873b424c65e91c2846b19'] = 'Abbrechen';
-$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_5ecd6740c70ffa2041c144196484f682'] = 'Vielen Dank. Ihr Angebot wurde verbindlich bestellt. Die Zahlung erfolgt auf Rechnung.';
 $_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_46e263bffe7d3bf4b11976457f29b647'] = 'Das Angebot konnte nicht bestellt werden. Bitte kontaktieren Sie den Support.';
+$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_d6ba932ac3e13d7369ad082f3ffd1a2c'] = 'Dieses Angebot wurde bestellt.';
+$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_cb8fe83175bea4ba19d633b1dc6ea656'] = 'Bestellung anzeigen';

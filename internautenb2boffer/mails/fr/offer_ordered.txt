@@ -23,7 +23,7 @@ Adresse de livraison :
 Adresse de facturation :
 {invoice_block_txt}
 
-Le paiement s'effectue sur facture. Si vous avez des questions, n'hésitez pas à nous contacter. Vous pouvez consulter votre commande dans la section « Historique et détails des commandes » de votre compte client.
+Si vous avez des questions, n'hésitez pas à nous contacter. Vous pouvez consulter votre commande dans la section « Historique et détails des commandes » de votre compte client.
 {history_url}
 
 {shop_name} – {shop_url}

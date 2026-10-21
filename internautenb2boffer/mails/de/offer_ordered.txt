@@ -23,7 +23,7 @@ Lieferadresse:
 Rechnungsadresse:
 {invoice_block_txt}
 
-Die Zahlung erfolgt auf Rechnung. Bei Fragen können Sie uns gerne kontaktieren. Sie können Ihre Bestellung im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos einsehen.
+Bei Fragen können Sie uns gerne kontaktieren. Sie können Ihre Bestellung im Abschnitt „Verlauf und Details Ihrer Bestellungen“ Ihres Kundenkontos einsehen.
 {history_url}
 
 {shop_name} – {shop_url}

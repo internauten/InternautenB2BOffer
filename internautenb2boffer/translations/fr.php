@@ -14,7 +14,6 @@ $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_1d3bb92700ca25028
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_2d0952c7dfad480fb4ffe2cb697c3582'] = 'Demande d\'offre';
 $_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_19e6d0c2e33268b1d203be25d30c21b4'] = 'Votre offre a ete acceptee. Vous pouvez passer cette commande sans modifications.';
 $_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_a190b7acabd5578668a4d0787558af1e'] = 'Commander l\'offre acceptee maintenant';
-$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_d949ee1202d06386fd0b6c2eb36fc1ff'] = 'L\'offre n\'a pas pu etre transferee au checkout. Veuillez contacter le support.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_7ee3b2771d7428b8336df3080976f649'] = 'Utiliser les modèles d\'e-mail du module';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_fb97d9024c8582846d434044e1ecc8d5'] = 'Si activé, le modèle d\'e-mail offer_request est chargé depuis le répertoire du module (mails/). Si désactivé, PrestaShop recherche le modèle dans le thème actif ou le répertoire de mails par défaut.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_e55f75a29310d7b60f7ac1d390c8ae42'] = 'Module';
@@ -54,12 +53,6 @@ $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_e2a6530d7529c97c1
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_b9835edc07785db3a903c835f49cd473'] = 'Nombre de jours après l\'acceptation pendant lesquels le client peut commander une offre acceptée. 0 = aucune limite.';
 $_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_3e82615055af671f2a6187252e3a441a'] = 'Cette offre a expiré et ne peut plus être commandée. Veuillez demander une nouvelle offre.';
 $_MODULE['<{internautenb2boffer}prestashop>internautenb2boffer_5dff2e1deead2b063c4608d2c72fb8f1'] = 'Offre commandée';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_cd92bd432a1ef21702f6a9c5c8769044'] = 'Commander l\'offre';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_02eac3b53ab122f6b5d51a25107c636e'] = 'Offre :';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_66c4c5112f455a19afde47829df363fa'] = 'Total :';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_ddc3e9da52c9e2d189fb42fd1cd064d0'] = 'Paiement : sur facture';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_bf3f242f76caef5304671a78a062f433'] = 'Souhaitez-vous commander cette offre de manière ferme ?';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_e25c962bd030206037e41c7cf8fb1792'] = 'Commander ferme';
-$_MODULE['<{internautenb2boffer}prestashop>place_offer_ea4788705e6873b424c65e91c2846b19'] = 'Annuler';
-$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_5ecd6740c70ffa2041c144196484f682'] = 'Merci. Votre offre a été commandée de manière ferme. Le paiement s\'effectue sur facture.';
 $_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_46e263bffe7d3bf4b11976457f29b647'] = 'L\'offre n\'a pas pu être commandée. Veuillez contacter le support.';
+$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_d6ba932ac3e13d7369ad082f3ffd1a2c'] = 'Cette offre a été commandée.';
+$_MODULE['<{internautenb2boffer}prestashop>order_detail_place_order_cb8fe83175bea4ba19d633b1dc6ea656'] = 'Voir la commande';

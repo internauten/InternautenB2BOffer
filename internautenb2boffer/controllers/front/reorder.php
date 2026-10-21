@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-// Lets the customer confirm an accepted offer as a binding order on the existing order (payment by invoice).
+// Starts the regular checkout for an accepted offer with a cart that keeps the offer prices.
 // Copyright (c) 2026 die.internauten.ch GmbH
 // License: MIT
 
@@ -16,11 +16,23 @@ class Internautenb2bofferReorderModuleFrontController extends ModuleFrontControl
 
     private const DEBUG_LOG_PREFIX = '[internautenb2boffer] reorder:';
 
-    private ?Order $order = null;
-
     public function postProcess(): void
     {
-        $order = $this->loadCustomerOrder();
+        if (!$this->module->active || !$this->context->customer->isLogged()) {
+            $this->debugLog('redirect history: module_inactive_or_not_logged');
+            Tools::redirect('index.php?controller=history');
+        }
+
+        $order = new Order((int) Tools::getValue('id_order'));
+        $secureKey = (string) Tools::getValue('key');
+        if (!Validate::isLoadedObject($order)
+            || $secureKey === ''
+            || (int) $order->id_customer !== (int) $this->context->customer->id
+            || !hash_equals((string) $order->secure_key, $secureKey)
+        ) {
+            $this->debugLog('redirect history: invalid_order_or_key order=' . (int) Tools::getValue('id_order'), 2);
+            Tools::redirect('index.php?controller=history');
+        }
 
         $offerState = $this->module->getOfferState($order);
         if ($offerState === Internautenb2boffer::OFFER_STATE_EXPIRED) {
@@ -32,77 +44,23 @@ class Internautenb2bofferReorderModuleFrontController extends ModuleFrontControl
             Tools::redirect($this->getOrderDetailUrl((int) $order->id, 'not_accepted'));
         }
 
-        $this->order = $order;
-
-        if (!Tools::isSubmit('submitPlaceOffer')) {
-            return;
+        try {
+            $cart = $this->module->startOfferCheckout($order);
+        } catch (Throwable $exception) {
+            $this->debugLog('exception order=' . (int) $order->id . ' ' . $exception->getMessage(), 3);
+            $cart = null;
         }
 
-        if (!hash_equals($this->getFormToken($order), (string) Tools::getValue('token'))) {
-            $this->debugLog('invalid_token order=' . (int) $order->id, 2);
+        if ($cart === null) {
             Tools::redirect($this->getOrderDetailUrl((int) $order->id, 'failed'));
         }
 
-        try {
-            $placed = $this->module->placeAcceptedOffer($order);
-        } catch (Throwable $exception) {
-            $this->debugLog('exception order=' . (int) $order->id . ' ' . $exception->getMessage(), 3);
-            $placed = false;
-        }
+        $this->context->cart = $cart;
+        $this->context->cookie->id_cart = (int) $cart->id;
+        $this->context->cookie->write();
 
-        $this->debugLog('place_offer order=' . (int) $order->id . ' success=' . (int) $placed);
-        Tools::redirect($this->getOrderDetailUrl((int) $order->id, $placed ? 'ordered' : 'failed'));
-    }
-
-    public function initContent(): void
-    {
-        parent::initContent();
-
-        $order = $this->order;
-        $this->context->smarty->assign([
-            'internautenb2boffer_reference' => $order->getUniqReference(),
-            'internautenb2boffer_total' => $this->context->getCurrentLocale()->formatPrice(
-                (float) $order->total_paid,
-                (string) Currency::getIsoCodeById((int) $order->id_currency)
-            ),
-            'internautenb2boffer_action_url' => $this->context->link->getModuleLink(
-                $this->module->name,
-                'reorder',
-                ['id_order' => (int) $order->id, 'key' => (string) $order->secure_key],
-                true
-            ),
-            'internautenb2boffer_token' => $this->getFormToken($order),
-            'internautenb2boffer_detail_url' => $this->context->link->getPageLink('order-detail', true, null, ['id_order' => (int) $order->id]),
-        ]);
-
-        $this->setTemplate('module:internautenb2boffer/views/templates/front/place_offer.tpl');
-    }
-
-    private function loadCustomerOrder(): Order
-    {
-        if (!$this->module->active || !$this->context->customer->isLogged()) {
-            $this->debugLog('redirect history: module_inactive_or_not_logged');
-            Tools::redirect('index.php?controller=history');
-        }
-
-        $order = new Order((int) Tools::getValue('id_order'));
-        $secureKey = (string) Tools::getValue('key');
-        if (
-            !Validate::isLoadedObject($order)
-            || $secureKey === ''
-            || (int) $order->id_customer !== (int) $this->context->customer->id
-            || !hash_equals((string) $order->secure_key, $secureKey)
-        ) {
-            $this->debugLog('redirect history: invalid_order_or_key order=' . (int) Tools::getValue('id_order'), 2);
-            Tools::redirect('index.php?controller=history');
-        }
-
-        return $order;
-    }
-
-    private function getFormToken(Order $order): string
-    {
-        return Tools::getToken('internautenb2boffer_place_offer_' . (int) $order->id);
+        $this->debugLog('checkout order=' . (int) $order->id . ' cart=' . (int) $cart->id);
+        Tools::redirect($this->context->link->getPageLink('order', true));
     }
 
     private function getOrderDetailUrl(int $orderId, string $status): string

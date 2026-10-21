@@ -23,7 +23,7 @@ Indirizzo di consegna:
 Indirizzo di fatturazione:
 {invoice_block_txt}
 
-Il pagamento avviene tramite fattura. Se hai domande, non esitare a contattarci. Puoi consultare il tuo ordine nella sezione «Cronologia e dettagli ordini» del tuo account cliente.
+Se hai domande, non esitare a contattarci. Puoi consultare il tuo ordine nella sezione «Cronologia e dettagli ordini» del tuo account cliente.
 {history_url}
 
 {shop_name} – {shop_url}

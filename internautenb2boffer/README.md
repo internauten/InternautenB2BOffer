@@ -12,11 +12,11 @@ Payment module that adds a "Get Offer" payment method. Customers place the order
 
 - Adds a checkout payment method: Get Offer.
 - Creates a pending order in "Awaiting Get Offer" state.
-- Adds extra order states for your workflow: "Offer accepted", "Offer rejected", and "Offer ordered".
+- Adds extra order states for your workflow: "Offer accepted" and "Offer rejected" (plus "Offer ordered", only used by orders placed with version 2.0.x).
 - Custom order confirmation message for this payment method.
 - Replaces the standard order confirmation email (`order_conf`) with an "Offer request" email for orders placed with this payment method.
 - Sends custom emails for "Offer accepted", "Offer rejected", and "Offer ordered" with full order details.
-- Lets customers order an accepted offer from their order details page or order history, within a configurable number of days after acceptance. The existing order is reused (no new cart or order) and switched to payment by invoice.
+- Lets customers order an accepted offer through the regular checkout (with free choice of carrier and payment method) from their order details page or order history, within a configurable number of days after acceptance. The offer prices are kept.
 - Cancels rejected offers automatically so their reserved stock is released.
 - Back office settings for the email template source and debug logging.
 - Back office email preview: render any module email with the data of an existing order without sending it.
@@ -49,16 +49,15 @@ The offer can only be ordered within the number of days set in "Offer validity (
 
 Clicking the button:
 
-1. Verifies that the order belongs to the customer, was placed with this module, matches the order's secure key, is still in "Offer accepted" state, and has not expired.
-2. Shows a confirmation page with the offer reference, total, and "Payment: by invoice".
-3. After confirmation, the existing order is reused: no new cart or order is created, so prices, discounts, addresses, and the reserved stock stay as in the offer.
-   - The payment method is switched to the `invoicepayment` module ("Payment by invoice"). If that module is not installed or inactive, the payment method is left unchanged and a debug log entry is written.
-   - The order status is set to "Offer ordered" (counts as a valid order; not paid, not shipped, no invoice yet).
-   - The customer receives the `offer_ordered` email and returns to the order details page with a confirmation.
+1. Verifies that the order belongs to the customer, was placed with this module, matches the order's secure key, is in "Offer accepted" state, and has not expired.
+2. Creates a new cart with the products, quantities, and addresses of the offer. For each product, a specific price bound to this cart pins the offer's unit price excl. tax (including prices changed in the back office). Order-level cart rules of the offer are added again if they are still valid.
+3. Sets the offer to "Canceled" (without email) to release its reserved stock, because the checkout stock check does not take the offer's own reservation into account.
+4. Redirects the customer to the regular checkout. Carrier, shipping costs, and payment method are chosen there; shipping costs are recalculated.
+5. When the order is placed, the offer is linked to the new order (table `internautenb2boffer_checkout`) and the customer receives the `offer_ordered` email in addition to the confirmation of the chosen payment method.
 
-Orders switched to `invoicepayment` are not registered for its payment reminders, and its customer group rules are not checked.
+If the customer leaves the checkout, the cancelled offer stays orderable while it is valid: clicking the button again reuses the same cart. The stock is no longer reserved in the meantime. Once ordered, the offer's order details page links to the new order.
 
-If the order cannot be placed, the order details page shows a warning asking the customer to contact support.
+If the cart cannot be created, the order details page shows a warning asking the customer to contact support.
 
 ### Order history (theme change required)
 
@@ -74,7 +73,7 @@ The order history template (`customer/history.tpl`) has no module hook. The modu
 {/if}
 ```
 
-`$order.internautenb2boffer` only exists for orders of this module in "Offer accepted" state that belong to the logged-in customer. `label` is already translated ("Order offer" or "Offer expired").
+`$order.internautenb2boffer` only exists for orderable or expired offers of this module that belong to the logged-in customer. `label` is already translated ("Order offer" or "Offer expired").
 
 ## Configuration
 
@@ -112,6 +111,7 @@ The module registers the following hooks on installation:
 | `actionEmailSendBefore` | Replaces the `order_conf` email with `offer_request` for orders placed with this module. |
 | `actionOrderStatusPostUpdate` | Sends the `offer_accepted` or `offer_rejected` email when the order status changes accordingly. |
 | `actionOrderHistoryAddAfter` | Sets a rejected offer to "Canceled" right after "Offer rejected" is saved, to release reserved stock. |
+| `actionValidateOrder` | Links an order placed from an offer checkout cart to the offer and sends the `offer_ordered` email. Added in version 3.0.0 by `upgrade/upgrade-3.0.0.php`. |
 
 `displayOrderDetail` was added in version 1.0.7 and is registered for existing installations by `upgrade/upgrade-1.0.7.php`. `actionPresentOrder` and the offer validity setting were added in version 1.3.0 by `upgrade/upgrade-1.3.0.php`. `actionOrderHistoryAddAfter` and the "Offer ordered" state were added in version 2.0.0 by `upgrade/upgrade-2.0.0.php`, which also cancels offers that were already rejected.
 
@@ -185,7 +185,7 @@ This module ships the following email templates in the module folder:
 | `offer_request` | Order is placed with "Get Offer" (replaces `order_conf`) | Depends on "Use module email templates" |
 | `offer_accepted` | Order status changes to "Offer accepted" | Always the module path |
 | `offer_rejected` | Order status changes to "Offer rejected" | Always the module path |
-| `offer_ordered` | Customer orders an accepted offer | Always the module path |
+| `offer_ordered` | Customer completes the checkout for an accepted offer | Always the module path |
 
 The HTML templates are plain, hand-written table layouts with inline styles (no MJML output, no external images or fonts). All languages share the same structure, so a change in one template can be copied to the others by only translating the texts.
 
@@ -235,7 +235,7 @@ Prices of line items, discounts, and the subtotals `{total_products}`, `{total_d
 
 | Column | Calculation |
 |---|---|
-| RRP incl. VAT | Regular price excl. tax (`original_product_price`) x (1 + tax rate) |
+| RRP incl. VAT | Regular catalog price excl. tax (product price + combination impact, without any specific prices) x (1 + tax rate of the order line) |
 | Unit price | Reduced price excl. tax (`unit_price_tax_excl`) |
 | Margin | Regular price excl. tax - reduced price excl. tax, per unit |
 | Quantity | Ordered quantity |

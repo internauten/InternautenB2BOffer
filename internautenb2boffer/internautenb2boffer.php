@@ -20,7 +20,7 @@ class Internautenb2boffer extends PaymentModule
     public const OFFER_STATE_ORDERABLE = 'orderable';
     public const OFFER_STATE_EXPIRED = 'expired';
     public const OS_OFFER_ORDERED_CONFIG_KEY = 'INTERNAUTENB2BOFFER_OS_OFFER_ORDERED';
-    private const INVOICE_PAYMENT_MODULE = 'invoicepayment';
+    public const CHECKOUT_TABLE = 'internautenb2boffer_checkout';
     private const DEBUG_LOG_PREFIX = '[internautenb2boffer] ';
     private const PREVIEW_TEMPLATES = ['offer_request', 'offer_accepted', 'offer_rejected', 'offer_ordered'];
     private const PREVIEW_FORMATS = ['html', 'txt'];
@@ -30,7 +30,7 @@ class Internautenb2boffer extends PaymentModule
     {
         $this->name = 'internautenb2boffer';
         $this->tab = 'payments_gateways';
-        $this->version = '2.0.0';
+        $this->version = '3.0.0';
         $this->author = 'die.internauten.ch';
         $this->controllers = ['validation', 'reorder'];
         $this->is_eu_compatible = 1;
@@ -56,9 +56,11 @@ class Internautenb2boffer extends PaymentModule
             && $this->registerHook('actionOrderStatusPostUpdate')
             && $this->registerHook('actionPresentOrder')
             && $this->registerHook('actionOrderHistoryAddAfter')
+            && $this->registerHook('actionValidateOrder')
             && Configuration::updateValue(self::DEBUG_CONFIG_KEY, 0)
             && Configuration::updateValue(self::MODULE_MAIL_TPL_CONFIG_KEY, 1)
             && Configuration::updateValue(self::OFFER_VALIDITY_DAYS_CONFIG_KEY, self::OFFER_VALIDITY_DAYS_DEFAULT)
+            && $this->installCheckoutTable()
             && $this->installOrderStates();
     }
 
@@ -67,9 +69,26 @@ class Internautenb2boffer extends PaymentModule
         Configuration::deleteByName(self::DEBUG_CONFIG_KEY);
         Configuration::deleteByName(self::MODULE_MAIL_TPL_CONFIG_KEY);
         Configuration::deleteByName(self::OFFER_VALIDITY_DAYS_CONFIG_KEY);
+        Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . self::CHECKOUT_TABLE . '`');
 
         return $this->keepOrderStates()
             && parent::uninstall();
+    }
+
+    // Links an offer to the checkout cart created from it and to the order placed with that cart.
+    public function installCheckoutTable(): bool
+    {
+        return Db::getInstance()->execute(
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . self::CHECKOUT_TABLE . '` ('
+            . '`id_order_offer` INT UNSIGNED NOT NULL,'
+            . '`id_cart` INT UNSIGNED NOT NULL,'
+            . '`id_order_new` INT UNSIGNED NOT NULL DEFAULT 0,'
+            . '`date_add` DATETIME NOT NULL,'
+            . '`date_upd` DATETIME NOT NULL,'
+            . 'PRIMARY KEY (`id_order_offer`),'
+            . 'KEY `id_cart` (`id_cart`)'
+            . ') ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4'
+        );
     }
 
     public function getContent()
@@ -174,18 +193,20 @@ class Internautenb2boffer extends PaymentModule
             return '';
         }
 
-        $status = (string) Tools::getValue('offer_reorder', '');
         $offerState = $this->getOfferState($order);
-        $justOrdered = $status === 'ordered'
-            && (int) $order->current_state === (int) Configuration::get(self::OS_OFFER_ORDERED_CONFIG_KEY);
-        if ($offerState === self::OFFER_STATE_NONE && !$justOrdered) {
+        $link = $this->getCheckoutLink((int) $order->id);
+        $newOrderId = $link ? (int) $link['id_order_new'] : 0;
+        if ($offerState === self::OFFER_STATE_NONE && $newOrderId <= 0) {
             return '';
         }
 
         $this->smarty->assign([
             'internautenb2boffer_place_order_url' => $offerState === self::OFFER_STATE_ORDERABLE ? $this->getPlaceOfferUrl($order) : '',
-            'internautenb2boffer_reorder_status' => $status,
-            'internautenb2boffer_offer_state' => $justOrdered ? 'ordered' : $offerState,
+            'internautenb2boffer_reorder_status' => (string) Tools::getValue('offer_reorder', ''),
+            'internautenb2boffer_offer_state' => $newOrderId > 0 ? 'ordered' : $offerState,
+            'internautenb2boffer_new_order_url' => $newOrderId > 0
+                ? $this->context->link->getPageLink('order-detail', true, null, ['id_order' => $newOrderId])
+                : '',
         ]);
 
         return $this->fetch('module:internautenb2boffer/views/templates/hook/order_detail_place_order.tpl');
@@ -263,43 +284,192 @@ class Internautenb2boffer extends PaymentModule
         return $saved;
     }
 
-    // Turns the accepted offer into a binding order on the same order record (no new cart or order).
-    public function placeAcceptedOffer(Order $order): bool
+    // Returns the checkout cart for an orderable offer: an unfinished one is reused, otherwise a new one is built.
+    public function startOfferCheckout(Order $order): ?Cart
     {
-        $orderedId = (int) Configuration::get(self::OS_OFFER_ORDERED_CONFIG_KEY);
-        if ($orderedId <= 0 || $this->getOfferState($order) !== self::OFFER_STATE_ORDERABLE) {
-            return false;
+        if ($this->getOfferState($order) !== self::OFFER_STATE_ORDERABLE) {
+            return null;
         }
 
-        $invoiceModule = Module::getInstanceByName(self::INVOICE_PAYMENT_MODULE);
-        if ($invoiceModule instanceof PaymentModule && $invoiceModule->active) {
-            $order->module = $invoiceModule->name;
-            $order->payment = $invoiceModule->displayName;
-            $order->update();
-        } else {
-            $this->debugLog('placeAcceptedOffer:invoice_payment_unavailable order=' . (int) $order->id, 2);
+        $link = $this->getCheckoutLink((int) $order->id);
+        if ($link && (int) $link['id_order_new'] === 0) {
+            $cart = new Cart((int) $link['id_cart']);
+            if (Validate::isLoadedObject($cart) && !$cart->orderExists()) {
+                return $cart;
+            }
         }
 
-        $history = new OrderHistory();
-        $history->id_order = (int) $order->id;
-        $history->id_employee = 0;
-        $history->changeIdOrderState($orderedId, $order);
-        if (!$history->add()) {
-            $this->debugLog('placeAcceptedOffer:history_failed order=' . (int) $order->id, 3);
-
-            return false;
+        $cart = $this->buildOfferCart($order);
+        if ($cart === null) {
+            return null;
         }
 
-        $this->sendOfferMail($order, 'offer_ordered', $this->l('Offer ordered'));
+        $now = date('Y-m-d H:i:s');
+        Db::getInstance()->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . self::CHECKOUT_TABLE . '` (`id_order_offer`, `id_cart`, `id_order_new`, `date_add`, `date_upd`)'
+            . ' VALUES (' . (int) $order->id . ', ' . (int) $cart->id . ', 0, \'' . pSQL($now) . '\', \'' . pSQL($now) . '\')'
+            . ' ON DUPLICATE KEY UPDATE `id_cart` = VALUES(`id_cart`), `id_order_new` = 0, `date_upd` = VALUES(`date_upd`)'
+        );
 
-        return true;
+        // The checkout stock check ignores the offer's own reservation, so release it first.
+        $this->cancelOrderSilently($order);
+        $this->debugLog('startOfferCheckout order=' . (int) $order->id . ' cart=' . (int) $cart->id);
+
+        return $cart;
+    }
+
+    public function hookActionValidateOrder($params)
+    {
+        $cart = $params['cart'] ?? null;
+        $newOrder = $params['order'] ?? null;
+        if (!$cart instanceof Cart || !$newOrder instanceof Order) {
+            return;
+        }
+
+        $offerId = (int) Db::getInstance()->getValue(
+            'SELECT `id_order_offer` FROM `' . _DB_PREFIX_ . self::CHECKOUT_TABLE . '`'
+            . ' WHERE `id_cart` = ' . (int) $cart->id . ' AND `id_order_new` = 0'
+        );
+        if ($offerId <= 0) {
+            return;
+        }
+
+        Db::getInstance()->update(
+            self::CHECKOUT_TABLE,
+            ['id_order_new' => (int) $newOrder->id, 'date_upd' => date('Y-m-d H:i:s')],
+            '`id_order_offer` = ' . $offerId
+        );
+        $this->debugLog('hookActionValidateOrder offer=' . $offerId . ' new_order=' . (int) $newOrder->id);
+
+        $this->sendOfferMail($newOrder, 'offer_ordered', $this->l('Offer ordered'));
+    }
+
+    private function getCheckoutLink(int $offerOrderId): ?array
+    {
+        $row = Db::getInstance()->getRow(
+            'SELECT * FROM `' . _DB_PREFIX_ . self::CHECKOUT_TABLE . '` WHERE `id_order_offer` = ' . $offerOrderId
+        );
+
+        return is_array($row) ? $row : null;
+    }
+
+    private function buildOfferCart(Order $order): ?Cart
+    {
+        $customer = new Customer((int) $order->id_customer);
+        if (!Validate::isLoadedObject($customer)) {
+            return null;
+        }
+
+        $cart = new Cart();
+        $cart->id_customer = (int) $order->id_customer;
+        $cart->id_guest = (int) $this->context->cookie->id_guest;
+        $cart->id_address_delivery = (int) $order->id_address_delivery;
+        $cart->id_address_invoice = (int) $order->id_address_invoice;
+        $cart->id_currency = (int) $order->id_currency;
+        $cart->id_lang = (int) $order->id_lang;
+        $cart->id_shop = (int) $order->id_shop;
+        $cart->id_shop_group = (int) $order->id_shop_group;
+        $cart->secure_key = (string) $customer->secure_key;
+        $cart->recyclable = (int) $order->recyclable;
+        $cart->gift = (int) $order->gift;
+        $cart->gift_message = (string) $order->gift_message;
+        if (!$cart->add()) {
+            $this->debugLog('buildOfferCart:cart_add_failed order=' . (int) $order->id, 3);
+
+            return null;
+        }
+
+        $shop = new Shop((int) $order->id_shop);
+        foreach ($order->getProducts() as $product) {
+            $productId = (int) ($product['product_id'] ?? 0);
+            $attributeId = (int) ($product['product_attribute_id'] ?? 0);
+            $quantity = (int) ($product['product_quantity'] ?? 0);
+
+            $pinned = $this->pinOfferPrice($cart, $order, $product);
+            // Stock is checked in the checkout again, after the offer has released its reservation.
+            $added = $pinned ? $cart->updateQty($quantity, $productId, $attributeId, false, 'up', 0, $shop, true, true) : false;
+            if ($added !== true) {
+                $this->debugLog('buildOfferCart:add_product_failed order=' . (int) $order->id . ' product=' . $productId . ' attribute=' . $attributeId, 3);
+                SpecificPrice::deleteByIdCart((int) $cart->id);
+                $cart->delete();
+
+                return null;
+            }
+        }
+
+        $this->reapplyCartRules($order, $cart);
+
+        return $cart;
+    }
+
+    // Cart-bound specific prices take precedence over group and catalog prices for this cart only.
+    private function pinOfferPrice(Cart $cart, Order $order, array $product): bool
+    {
+        $productId = (int) ($product['product_id'] ?? 0);
+        $unitTaxExcl = (float) ($product['unit_price_tax_excl'] ?? 0);
+
+        // Group reductions are applied on top of specific prices by the core, so compensate for them.
+        $groupId = (int) Customer::getDefaultGroupId((int) $order->id_customer);
+        $groupRate = GroupReduction::getValueForProduct($productId, $groupId);
+        if ($groupRate === false) {
+            $groupRate = (float) Group::getReductionByIdGroup($groupId) / 100;
+        }
+        $groupRate = (float) $groupRate;
+        $price = $groupRate > 0 && $groupRate < 1 ? $unitTaxExcl / (1 - $groupRate) : $unitTaxExcl;
+
+        $specificPrice = new SpecificPrice();
+        $specificPrice->id_product = $productId;
+        $specificPrice->id_product_attribute = (int) ($product['product_attribute_id'] ?? 0);
+        $specificPrice->id_cart = (int) $cart->id;
+        $specificPrice->id_shop = (int) $order->id_shop;
+        $specificPrice->id_shop_group = 0;
+        $specificPrice->id_currency = (int) $order->id_currency;
+        $specificPrice->id_country = 0;
+        $specificPrice->id_group = 0;
+        $specificPrice->id_customer = (int) $order->id_customer;
+        $specificPrice->id_specific_price_rule = 0;
+        $specificPrice->price = round($price, 6);
+        $specificPrice->from_quantity = 1;
+        $specificPrice->reduction = 0;
+        $specificPrice->reduction_tax = 1;
+        $specificPrice->reduction_type = 'amount';
+        $specificPrice->from = '0000-00-00 00:00:00';
+        $specificPrice->to = '0000-00-00 00:00:00';
+
+        return (bool) $specificPrice->add();
+    }
+
+    private function reapplyCartRules(Order $order, Cart $cart): void
+    {
+        $context = $this->context->cloneContext();
+        $context->cart = $cart;
+
+        foreach ($order->getCartRules() as $row) {
+            $cartRule = new CartRule((int) $row['id_cart_rule']);
+            if (Validate::isLoadedObject($cartRule) && $cartRule->checkValidity($context, false, false) === true) {
+                $cart->addCartRule((int) $cartRule->id);
+            } else {
+                $this->debugLog('reapplyCartRules:skipped order=' . (int) $order->id . ' cart_rule=' . (int) $row['id_cart_rule']);
+            }
+        }
     }
 
     public function getOfferState(Order $order): string
     {
         $acceptedId = (int) Configuration::get('INTERNAUTENB2BOFFER_OS_OFFER_ACCEPTED');
-        if ($order->module !== $this->name || $acceptedId <= 0 || (int) $order->current_state !== $acceptedId) {
+        if ($order->module !== $this->name || $acceptedId <= 0) {
             return self::OFFER_STATE_NONE;
+        }
+
+        if ((int) $order->current_state !== $acceptedId) {
+            // An offer cancelled at checkout start stays orderable until the checkout cart has been ordered.
+            $link = $this->getCheckoutLink((int) $order->id);
+            if (!$link
+                || (int) $link['id_order_new'] > 0
+                || (int) $order->current_state !== (int) Configuration::get('PS_OS_CANCELED')
+            ) {
+                return self::OFFER_STATE_NONE;
+            }
         }
 
         $validityDays = (int) Configuration::get(self::OFFER_VALIDITY_DAYS_CONFIG_KEY);
@@ -631,12 +801,13 @@ class Internautenb2boffer extends PaymentModule
         return $helper->generateForm([$fieldsForm]);
     }
 
-    // Ordered offers switch to the invoice payment module, so they are recognised by their offer state history.
+    // Orders placed from an offer use another payment module; 2.0.x ordered offers are recognised by their state.
     private function getOfferOrderSqlCondition(string $alias): string
     {
         $orderedId = (int) Configuration::get(self::OS_OFFER_ORDERED_CONFIG_KEY);
 
         return '(' . $alias . '.`module` = \'' . pSQL($this->name) . '\''
+            . ' OR EXISTS (SELECT 1 FROM `' . _DB_PREFIX_ . self::CHECKOUT_TABLE . '` oc WHERE oc.`id_order_new` = ' . $alias . '.`id_order`)'
             . ($orderedId > 0
                 ? ' OR EXISTS (SELECT 1 FROM `' . _DB_PREFIX_ . 'order_history` oh WHERE oh.`id_order` = ' . $alias . '.`id_order` AND oh.`id_order_state` = ' . $orderedId . ')'
                 : '')
@@ -1098,7 +1269,7 @@ class Internautenb2boffer extends PaymentModule
     // Uses the prices stored on the order line, so later catalog changes do not alter the email.
     private function getProductLinePrices(array $product): array
     {
-        $regularTaxExcl = (float) ($product['original_product_price'] ?? 0);
+        $regularTaxExcl = $this->getCatalogBasePriceTaxExcl($product);
         $unitTaxExcl = (float) ($product['unit_price_tax_excl'] ?? 0);
         $taxRate = (float) ($product['tax_rate'] ?? 0);
 
@@ -1107,6 +1278,27 @@ class Internautenb2boffer extends PaymentModule
             'unit_tax_excl' => $unitTaxExcl,
             'margin_tax_excl' => $regularTaxExcl - $unitTaxExcl,
         ];
+    }
+
+    // original_product_price already contains group/customer fixed-price specific prices, so read the catalog price.
+    private function getCatalogBasePriceTaxExcl(array $product): float
+    {
+        $shopId = (int) ($product['id_shop'] ?? $this->context->shop->id);
+        $catalogProduct = new Product((int) ($product['product_id'] ?? 0), false, null, $shopId);
+        if (!Validate::isLoadedObject($catalogProduct)) {
+            return (float) ($product['original_product_price'] ?? 0);
+        }
+
+        $price = (float) $catalogProduct->price;
+        $attributeId = (int) ($product['product_attribute_id'] ?? 0);
+        if ($attributeId > 0) {
+            $combination = new Combination($attributeId, null, $shopId);
+            if (Validate::isLoadedObject($combination)) {
+                $price += (float) $combination->price;
+            }
+        }
+
+        return $price;
     }
 
     private function buildProductsTxt(array $products, Currency $currency)
